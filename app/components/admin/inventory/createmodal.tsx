@@ -90,7 +90,7 @@ export default function CreateSupplyModal({ open, handleClose, supplytypes, supp
                                     fullWidth
                                     {...register("name", { required: "Este campo es requerido" })}
                                     error={!!errors.name}
-                                    helperText={errors.name ? errors.name.message : "Ingrese Nombre y Apellido"}
+                                    helperText={errors.name ? errors.name.message : "Ingrese Nombre"}
                                 />
                             </div>                    
                             <div className='flex w-full md:w-2/6'>

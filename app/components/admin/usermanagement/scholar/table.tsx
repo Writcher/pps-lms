@@ -421,9 +421,9 @@ export default function ABMScholarTable({ usercareers, scholarships, laboratory_
                                                         <Chip 
                                                             label={row.userstatus} 
                                                             color={
-                                                                row.taskstatusname === "Inactivo"
+                                                                row.userstatus === "Inactivo"
                                                                 ? "error"
-                                                                : row.taskstatusname === "Pendiente"
+                                                                : row.userstatus === "Pendiente"
                                                                 ? "warning"
                                                                 : "success"
                                                             } 

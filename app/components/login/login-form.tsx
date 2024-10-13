@@ -11,6 +11,7 @@ import { loginFormData, loginFormProps } from "@/app/lib/dtos/user";
 import { useMutation } from "@tanstack/react-query";
 import { doCredentialLogin } from "@/app/services/login/login.service";
 import CircularProgress from "@mui/material/CircularProgress";
+import Link from "next/link";
 
 interface APIErrors {
     email?: string,
@@ -72,7 +73,7 @@ export default function LoginForm({ admin, guest, scholar }: loginFormProps ) {
                         helperText={errors.email ? errors.email.message : apiError.email ? apiError.email : "Ingrese su Email"}
                     />
                 </div>
-                <div className="flex flex-col items-center mb-6 gap-4">
+                <div className="flex flex-col items-center mb-4 gap-4">
                     <TextField 
                         id="password" 
                         label="Contraseña" 
@@ -84,6 +85,9 @@ export default function LoginForm({ admin, guest, scholar }: loginFormProps ) {
                         error={!!apiError.password}
                         helperText={apiError.password ? apiError.password : "Ingrese su Contraseña"}
                     />
+                </div>
+                <div className="flex items-center justify-center mb-6">
+                    <strong className="text-sm text-gray-700">¿Olvidaste tu contraseña? <Link className="text-sm text-orange-500" href={"#"}>Cambiala</Link>.</strong>
                 </div>
                 <Button 
                     variant="contained" 

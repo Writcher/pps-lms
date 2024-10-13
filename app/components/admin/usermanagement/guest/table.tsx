@@ -204,9 +204,9 @@ export default function ABMGuestTable({ laboratory_id }: guestTableProps ) {
                                                         <Chip 
                                                             label={row.userstatus} 
                                                             color={
-                                                                row.taskstatusname === "Expirado"
+                                                                row.userstatus === "Expirado"
                                                                 ? "error"
-                                                                : row.taskstatusname === "Pendiente"
+                                                                : row.userstatus === "Pendiente"
                                                                 ? "warning"
                                                                 : "success"
                                                             } 

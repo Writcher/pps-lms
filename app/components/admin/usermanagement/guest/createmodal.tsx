@@ -174,15 +174,19 @@ export default function CreateGuestModal({ open, handleClose, laboratory_id }: c
                                 variant="outlined"
                                 color="warning"
                                 fullWidth
-                                {...register("password", { 
-                                    required: "Este campo es requerido", 
+                                {...register("password", {
+                                    required: "Este campo es requerido",
                                     minLength: {
-                                        value: 12,
-                                        message: "Debe tener al menos 12 caracteres"
+                                        value: 8,
+                                        message: "La contraseña debe tener al menos 8 caracteres"
                                     },
-                                    pattern: {
-                                        value: /(?=.*\d)/,
-                                        message: "Debe incluir al menos 1 número"
+                                    validate: {
+                                        hasUpperCase: (value) =>
+                                            /[A-Z]/.test(value) || "La contraseña debe contener al menos una letra mayúscula",
+                                        hasLowerCase: (value) =>
+                                            /[a-z]/.test(value) || "La contraseña debe contener al menos una letra minúscula",
+                                        hasNumber: (value) =>
+                                            /[0-9]/.test(value) || "La contraseña debe contener al menos un número",
                                     }
                                 })}
                                 error={!!errors.password}
