@@ -1,6 +1,6 @@
+import ChatAdmin from "@/app/components/admin/messages/chat";
 import { auth } from "@/app/lib/auth";
 import { redirect } from "next/navigation";
-import ChatQuery from "@/app/components/admin/messages/chatQuery";
 
 export default async function MessagesPageAdmin() {
     const session = await auth();
@@ -10,7 +10,11 @@ export default async function MessagesPageAdmin() {
     const current_id = session?.user?.id;
     return (
         <main className="flex flex-col w-full h-full">
-            <ChatQuery laboratory_id={laboratory_id} current_id={current_id} usertype_id={usertype_id}/>
+            <ChatAdmin
+                laboratory_id={laboratory_id}
+                current_id={current_id}
+                usertype_id={usertype_id}
+            />
         </main>
     );
 };

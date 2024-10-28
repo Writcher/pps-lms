@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useCallback } from "react";
+import React, { useCallback, useEffect } from "react";
 import DeleteIcon from '@mui/icons-material/Delete';
 import TableContainer from "@mui/material/TableContainer";
 import Table from "@mui/material/Table";
@@ -23,7 +23,7 @@ import { guestFormData, guestTableProps } from "@/app/lib/dtos/guest";
 import '@/app/components/globals.css';
 import Chip from "@mui/material/Chip";
 
-export default function ABMGuestTable({ laboratory_id }: guestTableProps ) {
+export default function ABMGuestTable({ laboratory_id, setValueFeedback }: guestTableProps ) {
     const { watch, setValue } = useForm<guestFormData>({
         defaultValues: {
             //filters
@@ -47,7 +47,7 @@ export default function ABMGuestTable({ laboratory_id }: guestTableProps ) {
     //filters
         //search
     const search = watch("search");
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     const handleSearch = useCallback(debounce((searchTerm: string) => {
         setValue("search", searchTerm);
     }, 500), []);
@@ -73,11 +73,18 @@ export default function ABMGuestTable({ laboratory_id }: guestTableProps ) {
         setValue("page", 0);
     };
     //fetch
-    const { data, isLoading, refetch } = useQuery({
+    const { data, isLoading, refetch, isError } = useQuery({
         queryKey: ['tableData', search, sortColumn, sortDirection, page, rowsPerPage ],
         queryFn: () => fetchTableData({ search, laboratory_id, sortColumn, sortDirection, page, rowsPerPage }),
         refetchOnWindowFocus: false
     });
+    useEffect(() => {
+        if (isError) {
+            setValueFeedback("feedbackMessage", `Se ha encontrado un error recuperando la información, por favor, recarga la página`);
+            setValueFeedback("feedbackSeverity", 'error');
+            setValueFeedback("feedbackOpen", true);
+        };
+    }, [isError])
     //expanded row
     const expandedRowId = watch("expandedRowId");
     const toggleRowExpansion = (id: number) => {
@@ -192,7 +199,7 @@ export default function ABMGuestTable({ laboratory_id }: guestTableProps ) {
                                         <React.Fragment key={row.id}>
                                             <TableRow 
                                                 onClick={() => toggleRowExpansion(row.id)}
-                                                className={`cursor-pointer ${expandedRowId === row.id ? 'bg-gradient-to-r from-transparent to-transparent via-gray-200' : ''}`}
+                                                className={`cursor-pointer ${expandedRowId === row.id ? 'bg-gradient-to-r from-transparent to-transparent via-gray-100' : ''}`}
                                             >
                                                 <TableCell align="left" size="small" width="40%">
                                                     <div className="text-gray-700 font-medium text-[15px] md:text-lg">
@@ -204,9 +211,9 @@ export default function ABMGuestTable({ laboratory_id }: guestTableProps ) {
                                                         <Chip 
                                                             label={row.userstatus} 
                                                             color={
-                                                                row.taskstatusname === "Expirado"
+                                                                row.userstatus === "Expirado"
                                                                 ? "error"
-                                                                : row.taskstatusname === "Pendiente"
+                                                                : row.userstatus === "Pendiente"
                                                                 ? "warning"
                                                                 : "success"
                                                             } 
@@ -222,7 +229,7 @@ export default function ABMGuestTable({ laboratory_id }: guestTableProps ) {
                                                 </TableCell>
                                             </TableRow>
                                             {expandedRowId === row.id && (
-                                                <TableRow className="bg-gradient-to-r from-transparent to-transparent via-gray-200">
+                                                <TableRow className="bg-gradient-to-r from-transparent to-transparent via-gray-100">
                                                     <TableCell colSpan={3}>
                                                         <div className="flex flex-col w-full">
                                                             <div className="flex flex-col md:flex-row gap-4">
@@ -278,18 +285,22 @@ export default function ABMGuestTable({ laboratory_id }: guestTableProps ) {
                     page={page}
                     onPageChange={handleChangePage}
                     onRowsPerPageChange={handleChangeRowsPerPage}
+                    labelRowsPerPage="Filas por página"
+                    labelDisplayedRows={({ from, to, count }) => `${from}-${to} de ${count !== -1 ? count : `más de ${to}`}`}
                 />
             </div>
             <CreateGuestModal
                 open={modalOpenCreate}
                 handleClose={handleCloseCreateModal}
                 laboratory_id={laboratory_id}
+                setValueFeedback={setValueFeedback}
             />
             <DeleteGuestModal
                 open={modalOpenDelete}
                 handleClose={handleCloseDeleteModal}
                 id={selectedRowId!}
                 name={selectedRowName!}
+                setValueFeedback={setValueFeedback}
             />
         </main>
     );

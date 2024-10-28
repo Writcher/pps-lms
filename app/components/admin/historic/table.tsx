@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useCallback } from "react";
+import React, { useCallback, useEffect } from "react";
 import TableContainer from "@mui/material/TableContainer";
 import Table from "@mui/material/Table";
 import TableRow from "@mui/material/TableRow";
@@ -22,6 +22,7 @@ import { useForm } from "react-hook-form";
 import { useQuery } from "@tanstack/react-query";
 import { fetchTableData } from "@/app/services/historic/historic.service";
 import '@/app/components/globals.css';
+import FeedbackSnackbar from "../../feedback";
 
 export default function ABMHistoricTable({ historicusercareers, historicscholarships, historicprojecttypes, historicprojectstatus, laboratory_id }: historicTableProps ) {
     const { watch, setValue, getValues } = useForm<historicFormData>({
@@ -55,6 +56,13 @@ export default function ABMHistoricTable({ historicusercareers, historicscholars
             //sort by column
             sortDirection: "ASC",
             sortColumn: "hp.name"
+        }
+    });
+    const { watch: watchFeedback, setValue: setValueFeedback } = useForm({
+        defaultValues: {
+            feedbackOpen: false,
+            feedbackSeverity: "error" as "success" | "error",
+            feedbackMessage: "",
         }
     });
     //filters
@@ -306,11 +314,18 @@ export default function ABMHistoricTable({ historicusercareers, historicscholars
         page: page,
         rowsPerPage: rowsPerPage,
     } as fetchHistoricProjectData;
-    const { data, isLoading, refetch } = useQuery({
+    const { data, isLoading, refetch, isError } = useQuery({
         queryKey: ['tableData', projectSearch, historicprojectstatus_id, historicprojecttype_id, yearFilter, scholarSearch, historicusercareer_id, historicscholarshiptype_id, sortColumn, sortDirection, page, rowsPerPage],
         queryFn: () => fetchTableData(params),
         refetchOnWindowFocus: false
     });
+    useEffect(() => {
+        if (isError) {
+            setValueFeedback("feedbackMessage", `Se ha encontrado un error recuperando la información, por favor, recarga la página`);
+            setValueFeedback("feedbackSeverity", 'error');
+            setValueFeedback("feedbackOpen", true);
+        };
+    }, [isError])
     //expanded row
     const expandedRowId = watch("expandedRowId");
     const toggleRowExpansion = (id: number) => {
@@ -323,6 +338,13 @@ export default function ABMHistoricTable({ historicusercareers, historicscholars
     const handleCloseCreateModal = () => {
         setValue("modalOpenCreate", false);
         refetch();
+    };
+    //feedback
+    const feedbackOpen = watchFeedback("feedbackOpen");
+    const feedbackSeverity = watchFeedback("feedbackSeverity");
+    const feedbackMessage = watchFeedback("feedbackMessage");
+    const handleFeedbackClose = () => {
+        setValueFeedback("feedbackOpen", false);
     };
     return (
         <main className="flex flex-col gap-2 w-full h-full">
@@ -598,7 +620,7 @@ export default function ABMHistoricTable({ historicusercareers, historicscholars
                                         <React.Fragment key={row.id}>
                                             <TableRow 
                                                 onClick={() => toggleRowExpansion(row.id)}
-                                                className={`cursor-pointer ${expandedRowId === row.id ? 'bg-gradient-to-r from-transparent to-transparent via-gray-200' : ''}`}
+                                                className={`cursor-pointer ${expandedRowId === row.id ? 'bg-gradient-to-r from-transparent to-transparent via-gray-100' : ''}`}
                                             >
                                                 <TableCell align="left" size="small">
                                                     <div className="text-gray-700 font-medium text-[15px] md:text-lg">
@@ -622,7 +644,7 @@ export default function ABMHistoricTable({ historicusercareers, historicscholars
                                                 </TableCell>
                                             </TableRow>
                                             {expandedRowId === row.id && (
-                                                <TableRow className="bg-gradient-to-r from-transparent to-transparent via-gray-200">
+                                                <TableRow className="bg-gradient-to-r from-transparent to-transparent via-gray-100">
                                                     <TableCell colSpan={4}>
                                                         <div className="flex flex-col">
                                                             <div className="flex gap-1 text-gray-700 font-medium md:text-[17px]">
@@ -702,6 +724,8 @@ export default function ABMHistoricTable({ historicusercareers, historicscholars
                     page={page}
                     onPageChange={handleChangePage}
                     onRowsPerPageChange={handleChangeRowsPerPage}
+                    labelRowsPerPage="Filas por página"
+                    labelDisplayedRows={({ from, to, count }) => `${from}-${to} de ${count !== -1 ? count : `más de ${to}`}`}
                 />
             </div>
             <CreateHistoricProjectModal
@@ -712,6 +736,13 @@ export default function ABMHistoricTable({ historicusercareers, historicscholars
                 historicprojecttypes={historicprojecttypes}
                 historicprojectstatus={historicprojectstatus}
                 laboratory_id={laboratory_id}
+                setValueFeedback={setValueFeedback}
+            />
+            <FeedbackSnackbar
+                open={feedbackOpen}
+                onClose={handleFeedbackClose}
+                severity={feedbackSeverity}
+                message={feedbackMessage}
             />
         </main>
     );

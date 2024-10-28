@@ -1,4 +1,4 @@
-import UserQuery from "@/app/components/admin/usermanagement/userQuery";
+import UserTabs from "@/app/components/admin/usermanagement/usertabs";
 import { auth } from "@/app/lib/auth";
 import { getScholarshipTypes } from "@/app/lib/queries/scholarshiptype";
 import { getUserCareers } from "@/app/lib/queries/usercareer";
@@ -12,7 +12,7 @@ export default async function ABMusuarios() {
     const scholarships = await getScholarshipTypes();   
     return (
         <main className="flex flex-col w-full h-full">
-            <UserQuery 
+            <UserTabs 
                 usercareers={usercareers}
                 scholarships={scholarships}
                 laboratory_id={laboratory_id}

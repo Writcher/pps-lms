@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useCallback } from "react";
+import React, { useCallback, useEffect } from "react";
 import TableContainer from "@mui/material/TableContainer";
 import Table from "@mui/material/Table";
 import TableRow from "@mui/material/TableRow";
@@ -18,14 +18,16 @@ import FilterAltOffIcon from '@mui/icons-material/FilterAltOff';
 import Masonry from '@mui/lab/Masonry';
 import { ButtonGroup, Card, CardActionArea, CardContent, IconButton } from "@mui/material";
 import { useForm } from "react-hook-form";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import '@/app/components/globals.css';
-import { deleteProjectData, fetchTableProjectsData, projectFormData, projectsTableProps } from "@/app/lib/dtos/project";
-import { deleteProject, fetchTableData } from "@/app/services/projects/projects.service";
+import { fetchTableProjectsData, projectFormData, projectsTableProps } from "@/app/lib/dtos/project";
+import { fetchTableData } from "@/app/services/projects/projects.service";
 import { CircularProgressWithLabel, MasonrySkeleton } from "./utils";
 import CreateProjectModal from "./createmodal";
 import { useRouter } from "next/navigation";
 import DeleteIcon from '@mui/icons-material/Delete';
+import DeleteProjectModal from "./deletemodal";
+import FeedbackSnackbar from "../../feedback";
 
 export default function ABMProjectTable({ usercareers, scholarships, projecttypes, projectstatuses, laboratory_id }: projectsTableProps) {
     const { watch, setValue, getValues } = useForm<projectFormData>({
@@ -50,8 +52,19 @@ export default function ABMProjectTable({ usercareers, scholarships, projecttype
             //pagination
             page: 0,
             rowsPerPage: 6,
+            //selected row
+            selectedRowId: 0,
+            selectedRowName: "",
             //modals
             modalOpenCreate: false,
+            modalOpenDelete: false,
+        }
+    });
+    const { watch: watchFeedback, setValue: setValueFeedback } = useForm({
+        defaultValues: {
+            feedbackOpen: false,
+            feedbackSeverity: "error" as "success" | "error",
+            feedbackMessage: "",
         }
     });
     //router init
@@ -261,11 +274,18 @@ export default function ABMProjectTable({ usercareers, scholarships, projecttype
         page: page,
         rowsPerPage: rowsPerPage,
     } as fetchTableProjectsData;
-    const { data, isLoading, refetch } = useQuery({
+    const { data, isLoading, refetch, isError } = useQuery({
         queryKey: ['tableData', projectSearch, projectstatus_id, projecttype_id, scholarSearch, usercareer_id, scholarshiptype_id, page, rowsPerPage],
         queryFn: () => fetchTableData(params),
         refetchOnWindowFocus: false
     });
+    useEffect(() => {
+        if (isError) {
+            setValueFeedback("feedbackMessage", `Se ha encontrado un error recuperando la información, por favor, recarga la página`);
+            setValueFeedback("feedbackSeverity", 'error');
+            setValueFeedback("feedbackOpen", true);
+        };
+    }, [isError])
     //card click
     const handleCardClick = (id: number) => {
         router.push(`/admin/projects/${id}`);
@@ -278,19 +298,26 @@ export default function ABMProjectTable({ usercareers, scholarships, projecttype
         setValue("modalOpenCreate", false);
         refetch();
     };
+    //selected row
+    const selectedRowId = watch("selectedRowId");
+    const selectedRowName = watch("selectedRowName");
     //delete
-    const mutation = useMutation({
-        mutationFn: (data: deleteProjectData) => deleteProject(data),
-        onSuccess: (result) => {
-            if (result && result.success) {
-                refetch();
-            };
-        }
-    });
-    const handleDelete = (id: number) => {
-        mutation.mutate({
-            id: id
-        })
+    const modalOpenDelete = watch("modalOpenDelete");
+    const handleOpenDeleteModal = (id: number, name: string) => {
+        setValue("selectedRowId", id);
+        setValue("selectedRowName", name);
+        setValue("modalOpenDelete", true);
+    };
+    const handleCloseDeleteModal = () => {
+        setValue("modalOpenDelete", false);
+        refetch();
+    };
+    //feedback
+    const feedbackOpen = watchFeedback("feedbackOpen");
+    const feedbackSeverity = watchFeedback("feedbackSeverity");
+    const feedbackMessage = watchFeedback("feedbackMessage");
+    const handleFeedbackClose = () => {
+        setValueFeedback("feedbackOpen", false);
     };
     return (
         <main className="flex flex-col gap-2 w-full h-full">
@@ -470,7 +497,7 @@ export default function ABMProjectTable({ usercareers, scholarships, projecttype
             <div className="flex flex-grow custom-scrollbar overflow-y-auto">
                 <TableContainer>
                     <Table stickyHeader>
-                        {isLoading || mutation.isPending ? (
+                        {isLoading ? (
                             <TableBody>
                                 <TableRow>
                                     <MasonrySkeleton />
@@ -491,7 +518,7 @@ export default function ABMProjectTable({ usercareers, scholarships, projecttype
                                                 };
                                                 return (
                                                     <React.Fragment key={row.id}>
-                                                        <Card className="flex flex-col bg-gray-100 shadow-none border border-gray-400">
+                                                        <Card className="flex flex-col shadow-none border border-gray-400">
                                                             <CardActionArea onClick={() => handleCardClick(row.id)}>
                                                                 <CardContent>
                                                                     <div className="flex flex-col gap-2">
@@ -501,11 +528,11 @@ export default function ABMProjectTable({ usercareers, scholarships, projecttype
                                                                             </div>
                                                                             <div className="flex flex-grow" />
                                                                             <CircularProgressWithLabel value={projectprogress} color="warning" />
-                                                                            <IconButton 
-                                                                                color="error" 
+                                                                            <IconButton
+                                                                                color="error"
                                                                                 onClick={(event) => {
                                                                                     event.stopPropagation();
-                                                                                    handleDelete(row.id);
+                                                                                    handleOpenDeleteModal(row.id, row.name);
                                                                                 }}
                                                                             >
                                                                                 <DeleteIcon />
@@ -550,14 +577,30 @@ export default function ABMProjectTable({ usercareers, scholarships, projecttype
                     page={page}
                     onPageChange={handleChangePage}
                     onRowsPerPageChange={handleChangeRowsPerPage}
+                    labelRowsPerPage="Tarjetas por página"
+                    labelDisplayedRows={({ from, to, count }) => `${from}-${to} de ${count !== -1 ? count : `más de ${to}`}`}
                 />
             </div>
+            <DeleteProjectModal
+                open={modalOpenDelete}
+                handleClose={handleCloseDeleteModal}
+                id={selectedRowId!}
+                name={selectedRowName!}
+                setValueFeedback={setValueFeedback}
+            />
             <CreateProjectModal
                 open={modalOpenCreate}
                 handleClose={handleCloseCreateModal}
                 projecttypes={projecttypes}
                 projectstatuses={projectstatuses}
                 laboratory_id={laboratory_id}
+                setValueFeedback={setValueFeedback}
+            />
+            <FeedbackSnackbar
+                open={feedbackOpen}
+                onClose={handleFeedbackClose}
+                severity={feedbackSeverity}
+                message={feedbackMessage}
             />
         </main>
     );

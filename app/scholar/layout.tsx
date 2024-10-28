@@ -18,11 +18,11 @@ export default async function Layout({ children }: { children: React.ReactNode }
   };
   
   return (
-      <div className="flex flex-col md:flex-row h-screen">
-        <div className="w-full md:w-[15%]">
-          <SideNav />
-        </div>
-        <div className="flex flex-grow bg-gray-100 md:w-[85%]">{children}</div>
+    <div className="flex flex-col md:flex-row h-screen">
+      <div className="w-full md:w-[15%] h-[18.5%] md:h-full">
+        <SideNav />
       </div>
+      <div className="flex flex-grow bg-white w-full md:w-[85%] h-[81.5%] md:h-full">{children}</div>
+    </div>
   );
 };

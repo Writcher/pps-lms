@@ -20,6 +20,7 @@ export async function fetchTableData(data: fetchABMData) {
         return response;
     } catch (error) {
         console.error("Error en fetchTableData(ABM):", error);
+        throw error;
     };
 };
 
@@ -42,11 +43,11 @@ export async function createTableData(data: { name: string; table: string }) {
             return { success: true };
         } catch (error) {
             console.error("Error al crear Instancia:", error);
-            return { success: false };
+            throw error;
         };
     } catch (error) {
         console.error("Error en createTableData(ABM):", error);
-        return { success: false };
+        throw error;
     };
 };
 
@@ -70,10 +71,10 @@ export async function editTableData(data: { name: string; table: string; id:numb
             return { success: true };
         } catch (error) {
             console.error("Error al editar instancia:", error);
-            return { success: false };
+            throw error;
         };
     } catch (error) {
         console.error("Error en editTableData(ABM):", error);
-        return { success: false };
+        throw error;
     };
 };

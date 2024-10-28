@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useCallback } from "react";
+import React, { useCallback, useEffect } from "react";
 import TableContainer from "@mui/material/TableContainer";
 import Table from "@mui/material/Table";
 import TableRow from "@mui/material/TableRow";
@@ -22,7 +22,7 @@ import Skeleton from "@mui/material/Skeleton";
 import { ABMTableProps } from "@/app/lib/dtos/abm";
 import '@/app/components/globals.css';
 
-export default function ABMTable({ table }: ABMTableProps) {
+export default function ABMTable({ table, setValueFeedback }: ABMTableProps) {
     const { watch, setValue } = useForm({
         defaultValues: {
             //pagination
@@ -41,7 +41,7 @@ export default function ABMTable({ table }: ABMTableProps) {
     //filters
         //search
     const search = watch("search");
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     const handleSearch = useCallback(debounce((searchTerm: string) => {
         setValue("search", searchTerm);
     }, 500), []);
@@ -59,11 +59,18 @@ export default function ABMTable({ table }: ABMTableProps) {
         setValue("page", 0);
     };
     //fetch
-    const { data, isLoading, refetch } = useQuery({
+    const { data, isLoading, refetch, isError } = useQuery({
         queryKey: ['tableData', search, page, rowsPerPage],
         queryFn: () => fetchTableData({ search, table, page, rowsPerPage }),
         refetchOnWindowFocus: false
     });
+    useEffect(() => {
+        if (isError) {
+            setValueFeedback("feedbackMessage", `Se ha encontrado un error recuperando la información, por favor, recarga la página`);
+            setValueFeedback("feedbackSeverity", 'error');
+            setValueFeedback("feedbackOpen", true);
+        };
+    }, [isError])
     //modales
         //create
     const modalOpenCreate = watch("modalOpenCreate");
@@ -195,6 +202,8 @@ export default function ABMTable({ table }: ABMTableProps) {
                     page={page}
                     onPageChange={handleChangePage}
                     onRowsPerPageChange={handleChangeRowsPerPage}
+                    labelRowsPerPage="Filas por página"
+                    labelDisplayedRows={({ from, to, count }) => `${from}-${to} de ${count !== -1 ? count : `más de ${to}`}`}
                 />
             </div>
             <EditModal
@@ -202,12 +211,14 @@ export default function ABMTable({ table }: ABMTableProps) {
                 handleClose={handleCloseEditModal}
                 table={table}
                 id={selectedRowId!}        
-                name={selectedRowName!}        
+                name={selectedRowName!}
+                setValueFeedback={setValueFeedback}
             />
             <CreateModal
                 open={modalOpenCreate}
                 handleClose={handleCloseCreateModal}
                 table={table}
+                setValueFeedback={setValueFeedback}
             />
         </main>
     );

@@ -1,4 +1,4 @@
-import TaskPageQuery from '@/app/components/admin/projects/projectpage/projecttask/taskpage/taskpageQuery';
+import TaskPage from '@/app/components/admin/projects/projectpage/projecttask/taskpage/taskpage';
 import { auth } from '@/app/lib/auth';
 import { getProjectName } from '@/app/lib/queries/project';
 import { getTaskName } from '@/app/lib/queries/task';
@@ -15,7 +15,7 @@ export default async function TareaDetalle({ params }: { params : { id: number, 
     const current_id_number = Number(current_id_string);
     return (
         <main className="flex flex-col w-full h-full">
-            <div className="flex flex-row h-20 md:h-[10%] bg-gray-700 md:bg-gradient-to-l md:from-gray-800 md:to-gray-700 border-b-4 border-orange-500 md:border-transparent md:hover:bg-gradient-to-r md:hover:from-orange-500 md:hover:to-gray-800 text-white items-center">
+            <div className="flex flex-row h-20 h-[10%] bg-gray-700 md:bg-gradient-to-l md:from-gray-800 md:to-gray-700 border-b-4 border-orange-500 md:border-transparent md:hover:bg-gradient-to-r md:hover:from-orange-500 md:hover:to-gray-800 text-white items-center">
                 <Link href={`/admin/projects/${params.id}`} className="flex flex-row w-[25%]">
                     <KeyboardArrowLeftIcon className="ml-4"/>
                     <p className="ml-2">
@@ -28,8 +28,8 @@ export default async function TareaDetalle({ params }: { params : { id: number, 
                     </p>
                 </div>
             </div>
-            <div className="flex flex-col w-full px-4 py-4 md:px-6 md:py-6 md:h-[90%]">
-                <TaskPageQuery 
+            <div className="flex flex-col w-full px-4 py-4 md:px-6 md:py-6 h-[90%]">
+                <TaskPage 
                     task_id={params.task_id}
                     project_id={params.id}
                     current_id={current_id_number}

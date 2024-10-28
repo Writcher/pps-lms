@@ -19,7 +19,7 @@ interface APIError {
     name?: string
 };
 
-export default function EditModal({ open, handleClose, table, id, name }: editModalProps) {
+export default function EditModal({ open, handleClose, table, id, name, setValueFeedback}: editModalProps) {
     const { register, handleSubmit, reset, formState: { errors } } = useForm<editFormData>({
         defaultValues: {
             name: name
@@ -30,7 +30,29 @@ export default function EditModal({ open, handleClose, table, id, name }: editMo
         mutationFn: (data: editABMQuery) => editTableData(data),
         onSuccess: (result) => {
             if (result && result.success) {
-                handleClose();
+                setValueFeedback("feedbackMessage", `${(() => {
+                    switch (table) {
+                        case "supplytype":
+                            return "Tipo de Insumo creado";
+                        case "projecttype":
+                            return "Tipo de Proyecto creado";
+                        case "supplystatus":
+                            return "Estado de Insumo creado";
+                        case "projectstatus":
+                            return "Estado de Proyecto creado";
+                        case "scholarshiptype":
+                            return "Tipo de Beca creado";
+                        case "grade":
+                            return "Calificación creada";
+                        case "usercareer":
+                            return "Carrera creada";
+                        default:
+                            return "";
+                    }
+                })()} correctamente`);
+                setValueFeedback("feedbackSeverity", 'success');
+                setValueFeedback("feedbackOpen", true);
+                handleExit();
                 reset();
             } else if (result) {
                 if (result.apiError) {
@@ -38,8 +60,12 @@ export default function EditModal({ open, handleClose, table, id, name }: editMo
                 };
             };
         },
-        onError: (error: APIError) => {
-            setApiError({ name: error.name });
+        onError: () => {
+            setValueFeedback("feedbackMessage", `Se ha encontrado un error, por favor, intentalo nuevamente`);
+            setValueFeedback("feedbackSeverity", 'error');
+            setValueFeedback("feedbackOpen", true);
+            handleExit();
+            reset();
         },
     });
     const onSubmit: SubmitHandler<editFormData> = (data) => {
@@ -75,6 +101,7 @@ export default function EditModal({ open, handleClose, table, id, name }: editMo
                     component: 'form',
                     onSubmit: handleSubmit(onSubmit),
                     onClick: handleDialogClick,
+                    elevation: 0,
                     style: { width: '600px', maxWidth: 'none' }
                 }} 
             >

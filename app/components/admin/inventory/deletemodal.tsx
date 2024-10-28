@@ -12,15 +12,25 @@ import { deleteTableData } from '@/app/services/inventory/inventory.service';
 import { deleteSupplyModalProps } from '@/app/lib/dtos/supply';
 import CircularProgress from '@mui/material/CircularProgress';
 
-export default function DeleteSupplyModal({ open, handleClose, id, name }: deleteSupplyModalProps) {
+export default function DeleteSupplyModal({ open, handleClose, id, name, setValueFeedback }: deleteSupplyModalProps) {
     const { handleSubmit, reset } = useForm();
     const mutation = useMutation({
         mutationFn: () => deleteTableData(id),
         onSuccess: (result) => {
             if (result && result.success) {
+                setValueFeedback("feedbackMessage", `Insumo eliminado correctamente`);
+                setValueFeedback("feedbackSeverity", 'success');
+                setValueFeedback("feedbackOpen", true);
                 handleClose();
                 reset();
             };
+        },
+        onError: () => {
+            setValueFeedback("feedbackMessage", `Se ha encontrado un error, por favor, intentalo nuevamente`);
+            setValueFeedback("feedbackSeverity", 'error');
+            setValueFeedback("feedbackOpen", true);
+            handleClose();
+            reset();
         }
     });
     const onSubmit = () => {
@@ -43,6 +53,7 @@ export default function DeleteSupplyModal({ open, handleClose, id, name }: delet
                     component: 'form',
                     onSubmit: handleSubmit(onSubmit),
                     onClick: handleDialogClick,
+                    elevation: 0,
                     style: { width: '600px', maxWidth: 'none' }
                 }} 
             >

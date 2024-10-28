@@ -41,7 +41,7 @@ export async function doCredentialLogin(data: loginFormData) {
                 };
                 //is active?
                 if (user.userstatus_id === statusDeactivated || user.userstatus_id === statusExpired) {
-                    apiErrors.other = "La cuenta ha expirado o ha sido deshabiltada, contacte a un administrador de laboratorio";
+                    apiErrors.other = "La cuenta ha expirado o ha sido deshabilitada, contacte a un administrador de laboratorio";
                     return { success: false, apiError: apiErrors };
                 };
                 //is verified?
@@ -54,7 +54,7 @@ export async function doCredentialLogin(data: loginFormData) {
                     const expirationdate = new Date(Date.now() + 24 * 60 * 60 * 1000);
                     await createVerificationToken(token, user.email, expirationdate);
                     await sendVerificationEmail(user.email, token);
-                    apiErrors.other = "Se envió un email de verificación, por favor, revisa tu bandeja de entrada.";
+                    apiErrors.other = "Se envió un email de verificación, por favor, revisa tu bandeja de entrada";
                     return { success: false, apiError: apiErrors };
                 };
                 //everything ok

@@ -1,4 +1,4 @@
-import { fetchedTableProject } from "./project";
+import { UseFormSetValue } from "react-hook-form";
 import { scholarshipType } from "./scholarshiptype";
 import { newUserQuery, userSchema } from "./user";
 import { userCareer } from "./usercareer";
@@ -7,6 +7,7 @@ export type scholarTableProps = {
     usercareers: userCareer[];
     scholarships: scholarshipType[];
     laboratory_id: number;
+    setValueFeedback: UseFormSetValue<{ feedbackOpen: boolean, feedbackSeverity: 'success' | 'error', feedbackMessage: string }>
 };
 
 export type scholarFormData = {
@@ -45,6 +46,7 @@ export type createModalPorps = {
     usercareers: userCareer[];
     scholarships: scholarshipType[];
     laboratory_id: number;
+    setValueFeedback: UseFormSetValue<{ feedbackOpen: boolean, feedbackSeverity: 'success' | 'error', feedbackMessage: string }>
 };
 
 export type createFormData = {
@@ -90,6 +92,7 @@ export type editModalProps = {
     usercareers: userCareer[];
     scholarships: scholarshipType[];
     row: fetchedScholar;
+    setValueFeedback: UseFormSetValue<{ feedbackOpen: boolean, feedbackSeverity: 'success' | 'error', feedbackMessage: string }>
 };
 
 export type editFormData = {
@@ -172,6 +175,7 @@ export type deleteModalProps = {
     handleClose: () => void;
     id: number;
     name: string;
+    setValueFeedback: UseFormSetValue<{ feedbackOpen: boolean, feedbackSeverity: 'success' | 'error', feedbackMessage: string }>
 };
 
 export type Scholar = userSchema & {
@@ -192,10 +196,8 @@ export type fetchedProjectPageScholar = {
 };
 
 export type projectScholarTableProps = {
-    project_id: number;
-    laboratory_id: number;
-    scholars: fetchedProjectPageScholar[];
-    refetch: () => void;
+    id: number;
+    setValueFeedback: UseFormSetValue<{ feedbackOpen: boolean, feedbackSeverity: 'success' | 'error', feedbackMessage: string }>
 };
 
 export type projectScholarFormData = {
@@ -212,6 +214,7 @@ export type addScholarModalProps = {
     laboratory_id: number;
     project_id: number;
     scholar_ids: number[];
+    setValueFeedback: UseFormSetValue<{ feedbackOpen: boolean, feedbackSeverity: 'success' | 'error', feedbackMessage: string }>
 };
 
 export type addScholarFormData = {
@@ -231,6 +234,7 @@ export type removeScholarModalProps = {
     scholarname: string;
     project_id: number;
     scholar_id: number;
+    setValueFeedback: UseFormSetValue<{ feedbackOpen: boolean, feedbackSeverity: 'success' | 'error', feedbackMessage: string }>
 };
 
 export type removeScholarData =  {

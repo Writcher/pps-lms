@@ -23,7 +23,7 @@ import { createProjectTask } from '@/app/services/projects/projects.service';
 dayjs.locale('es');
 dayjs.extend(localizedFormat);
 
-export default function CreateTaskModal({ open, handleClose, project_id, start_date_new }: newProjectTaskModalProps) {
+export default function CreateTaskModal({ open, handleClose, project_id, start_date_new, setValueFeedback }: newProjectTaskModalProps) {
     let startDate = null as Dayjs | null;
     const { register, handleSubmit, reset, formState: { errors }, setValue, setError, clearErrors, watch } = useForm<newProjectTaskFormData>({
         defaultValues: {
@@ -34,9 +34,19 @@ export default function CreateTaskModal({ open, handleClose, project_id, start_d
         mutationFn: (data: createProjectTaskData) => createProjectTask(data),
         onSuccess: (result) => {
             if (result && result.success) {
-                handleClose();
+                setValueFeedback("feedbackMessage", `Tarea creada correctamente`);
+                setValueFeedback("feedbackSeverity", 'success');
+                setValueFeedback("feedbackOpen", true);
+                handleExit();
                 reset();
             };
+        },
+        onError: () => {
+            setValueFeedback("feedbackMessage", `Se ha encontrado un error, por favor, intentalo nuevamente`);
+            setValueFeedback("feedbackSeverity", 'error');
+            setValueFeedback("feedbackOpen", true);
+            handleExit();
+            reset();
         }
     });
     const onSubmit: SubmitHandler<newProjectTaskFormData> = (data) => {
@@ -55,9 +65,6 @@ export default function CreateTaskModal({ open, handleClose, project_id, start_d
     const handleDialogClick = (event: React.MouseEvent<HTMLDivElement>) => {
         event.stopPropagation();
     };
-    const isValidFutureDate = (value: Dayjs | null) => {
-        return value && value.isValid() && value.isAfter(dayjs());
-    };  
     useEffect(() => {
         if (start_date_new) {
             reset({
@@ -79,7 +86,8 @@ export default function CreateTaskModal({ open, handleClose, project_id, start_d
                 component: 'form',
                 onSubmit: handleSubmit(onSubmit),
                 onClick: handleDialogClick,
-                style: { width: '600px', maxWidth: 'none' }
+                elevation: 0,
+                    style: { width: '600px', maxWidth: 'none' }
             }}
         >
             <div className='flex flex-col m-2'>

@@ -1,8 +1,8 @@
 import LabTrackLogoWhite, { LabTrackLogoBlack } from "../components/labtrack-logo";
 import Alert from "@mui/material/Alert";
 import { getTypeAdmin, getTypeGuest, getTypeScholar } from "../lib/queries/usertype";
-import LoginQuery from "../components/login/loginQuery";
 import Link from "next/link";
+import LoginForm from "../components/login/login-form";
 
 export default async function Login({searchParams}: {searchParams: {verified: string}}) {
     const adminType = await getTypeAdmin();
@@ -43,7 +43,7 @@ export default async function Login({searchParams}: {searchParams: {verified: st
                     </p>
                 </div>
                 <div className="flex w-screen md:w-full justify-center items-center">
-                    <LoginQuery admin={adminType} guest={guestType} scholar={scholarType}/>
+                    <LoginForm admin={adminType} guest={guestType} scholar={scholarType}/>
                 </div>
                 <div className="flex">
                     <strong className="text-gray-700">¿No tienes una cuenta? <Link className="text-orange-500" href={"/register"}>Crea una</Link>.</strong>

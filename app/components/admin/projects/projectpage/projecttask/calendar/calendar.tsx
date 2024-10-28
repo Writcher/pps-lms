@@ -3,7 +3,7 @@
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import interactionPlugin from '@fullcalendar/interaction';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { deleteTask, editCalendarTask, fetchCalendarTasks } from '@/app/services/projects/projects.service';
@@ -14,14 +14,14 @@ import IconButton from '@mui/material/IconButton';
 import { useRouter } from 'next/navigation';
 import InfoIcon from '@mui/icons-material/Info';
 import CreateTaskModal from '../createprojecttaskmodal';
+import FeedbackSnackbar from '@/app/components/feedback';
 
 interface pageProps {
     id: number
 };
 
 export default function ProjectCalendar({ id }: pageProps) {
-    const calendarRef = useRef<FullCalendar | null>(null);
-    const { watch, setValue, getValues } = useForm<projectTaskCalendarFormData>({
+    const { watch, setValue } = useForm<projectTaskCalendarFormData>({
         defaultValues: {
             events: [],
             start_date: null,
@@ -29,6 +29,20 @@ export default function ProjectCalendar({ id }: pageProps) {
             modalOpenCreate: false,
         }
     });
+    //feedback
+    const { watch: watchFeedback, setValue: setValueFeedback } = useForm({
+        defaultValues: {
+            feedbackOpen: false,
+            feedbackSeverity: "error" as "success" | "error",
+            feedbackMessage: "",
+        }
+    });
+    const feedbackOpen = watchFeedback("feedbackOpen");
+    const feedbackSeverity = watchFeedback("feedbackSeverity");
+    const feedbackMessage = watchFeedback("feedbackMessage");
+    const handleFeedbackClose = () => {
+        setValueFeedback("feedbackOpen", false);
+    };
     //dates init
     useEffect(() => {
         const today = new Date();
@@ -83,8 +97,17 @@ export default function ProjectCalendar({ id }: pageProps) {
         mutationFn: (data: deleteTaskData) => deleteTask(data),
         onSuccess: (result) => {
             if (result && result.success) {
+                setValueFeedback("feedbackMessage", `Tarea eliminada correctamente`);
+                setValueFeedback("feedbackSeverity", 'success');
+                setValueFeedback("feedbackOpen", true);
                 refetch();
             };
+        },
+        onError: () => {
+            setValueFeedback("feedbackMessage", `Se ha encontrado un error, por favor, intentalo nuevamente`);
+            setValueFeedback("feedbackSeverity", 'error');
+            setValueFeedback("feedbackOpen", true);
+            refetch();
         }
     });
     const handleDelete = (id: string) => {
@@ -97,8 +120,17 @@ export default function ProjectCalendar({ id }: pageProps) {
         mutationFn: (data: dragTaskData) => editCalendarTask(data),
         onSuccess: (result) => {
             if (result && result.success) {
+                setValueFeedback("feedbackMessage", `Tarea editada correctamente`);
+                setValueFeedback("feedbackSeverity", 'success');
+                setValueFeedback("feedbackOpen", true);
                 refetch();
             };
+        },
+        onError: () => {
+            setValueFeedback("feedbackMessage", `Se ha encontrado un error, por favor, intentalo nuevamente`);
+            setValueFeedback("feedbackSeverity", 'error');
+            setValueFeedback("feedbackOpen", true);
+            refetch();
         }
     });
     const handleEventDrop = (info: any) => {
@@ -167,7 +199,6 @@ export default function ProjectCalendar({ id }: pageProps) {
         <main className="flex flex-col w-full h-full">
             <div className="flex flex-col h-full text-gray-700 overflow-y-auto custom-scrollbar">
                 <FullCalendar
-                    ref={calendarRef}
                     plugins={[dayGridPlugin, interactionPlugin]}
                     editable={true}
                     selectable={true}
@@ -178,7 +209,7 @@ export default function ProjectCalendar({ id }: pageProps) {
                     }}
                     eventDrop={handleEventDrop}
                     eventResize={handleEventResize}
-                    dateClick={(SelectInfo) => {handleOpenCreateModal(SelectInfo.date)}}
+                    dateClick={(SelectInfo) => { handleOpenCreateModal(SelectInfo.date) }}
                     initialView="dayGridMonth"
                     locale="esLocale"
                     headerToolbar={headerToolbar}
@@ -194,7 +225,7 @@ export default function ProjectCalendar({ id }: pageProps) {
                     height="100%"
                     datesSet={handleDatesSet}
                     events={events}
-                    eventClassNames="bg-gray-100 border-gray-800 rounded p-4"
+                    eventClassNames="bg-white border-gray-800 rounded p-4"
                     eventContent={eventInfo => (
                         <div className="flex flex-col h-full max-h-[150px] gap-2 overflow-y-auto custom-scrollbar">
                             <div className="flex items-center text-gray-700 font-medium md:font-bold text-[15px] break-words whitespace-pre-line mr-2">
@@ -230,6 +261,13 @@ export default function ProjectCalendar({ id }: pageProps) {
                 handleClose={handleCloseCreateModal}
                 project_id={id}
                 start_date_new={start_date_new}
+                setValueFeedback={setValueFeedback}
+            />
+            <FeedbackSnackbar
+                open={feedbackOpen}
+                onClose={handleFeedbackClose}
+                severity={feedbackSeverity}
+                message={feedbackMessage}
             />
         </main>
     );

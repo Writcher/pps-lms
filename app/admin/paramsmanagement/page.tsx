@@ -1,4 +1,4 @@
-import ABMQuery from "@/app/components/admin/paramsmanagement/abmQuery";
+import ABMTabs from "@/app/components/admin/paramsmanagement/abmtabs";
 import { auth } from "@/app/lib/auth";
 import { redirect } from "next/navigation";
 
@@ -8,7 +8,7 @@ export default async function ABMinicio() {
     if (!session?.user) redirect("/");
     return (
         <main className="flex flex-col w-full h-full">
-            <ABMQuery />       
+            <ABMTabs />       
         </main>
     );
 };

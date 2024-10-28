@@ -24,13 +24,13 @@ import EditIcon from '@mui/icons-material/Edit';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
 import debounce from "lodash.debounce";
-import React, { useCallback } from "react";
+import React, { useCallback, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import '@/app/components/globals.css';
 import Chip from "@mui/material/Chip";
 
-export default function ABMScholarTable({ usercareers, scholarships, laboratory_id }: scholarTableProps ) {
+export default function ABMScholarTable({ usercareers, scholarships, laboratory_id, setValueFeedback }: scholarTableProps) {
     const { watch, setValue, getValues } = useForm<scholarFormData>({
         defaultValues: {
             //filters
@@ -64,7 +64,7 @@ export default function ABMScholarTable({ usercareers, scholarships, laboratory_
     //filters
     const filterAnchor = watch("filterAnchor") as any;
     const filterMenuOpen = Boolean(filterAnchor);
-    const activeFilters = watch("activeFilters") as { [key: string ]: any };
+    const activeFilters = watch("activeFilters") as { [key: string]: any };
     const handleFilterClick = (event: React.MouseEvent<HTMLButtonElement>) => {
         setValue("filterAnchor", event.currentTarget);
     };
@@ -72,20 +72,20 @@ export default function ABMScholarTable({ usercareers, scholarships, laboratory_
         setValue("filterAnchor", null);
     };
     const handleClearFilters = () => {
-            //reset values
+        //reset values
         setValue("search", "");
         setValue("normalsearch", "");
         setValue("scholarshipTypeFilter", 0);
         setValue("userCareerFilter", 0);
-            //reset default filter show
+        //reset default filter show
         setValue("showSearchForm", true);
         setValue("showScholarshipTypeFilter", false);
         setValue("showUserCareerFilter", false);
-            //reset active filters and close
+        //reset active filters and close
         setValue("activeFilters", {});
         handleFilterClose();
     };
-        //search
+    //search
     const search = watch("search") as string;
     const normalsearch = watch("normalsearch") as string;
     const showSearchForm = watch("showSearchForm") as boolean;
@@ -108,7 +108,7 @@ export default function ABMScholarTable({ usercareers, scholarships, laboratory_
     const handleSearch = useCallback(debounce((searchTerm: string) => {
         setValue("search", searchTerm);
     }, 500), []);
-        //scholarshiptype filter
+    //scholarshiptype filter
     const scholarshiptype_id = watch("scholarshipTypeFilter") as number;
     const showScholarshipTypeFilter = watch("showScholarshipTypeFilter") as boolean;
     const handleScholarshipTypeFilterSelect = () => {
@@ -130,7 +130,7 @@ export default function ABMScholarTable({ usercareers, scholarships, laboratory_
         const scholarship = scholarships.find(sch => sch.id === id);
         return scholarship ? scholarship.name : 'Desconocida';
     };
-        //usercareer filter
+    //usercareer filter
     const usercareer_id = watch("userCareerFilter") as number;
     const showUserCareerFilter = watch("showUserCareerFilter") as boolean;
     const handleUserCareerFilterSelect = () => {
@@ -178,32 +178,39 @@ export default function ABMScholarTable({ usercareers, scholarships, laboratory_
         laboratory_id: laboratory_id,
         sortColumn: sortColumn,
         sortDirection: sortDirection,
-        page: page, 
+        page: page,
         rowsPerPage: rowsPerPage
     } as fetchScholarData;
-    const { data, isLoading, refetch } = useQuery({
-        queryKey: ['tableData', search, usercareer_id , scholarshiptype_id, sortColumn, sortDirection, page, rowsPerPage ],
+    const { data, isLoading, refetch, isError } = useQuery({
+        queryKey: ['tableData', search, usercareer_id, scholarshiptype_id, sortColumn, sortDirection, page, rowsPerPage],
         queryFn: () => fetchTableData(params),
         refetchOnWindowFocus: false
     });
+    useEffect(() => {
+        if (isError) {
+            setValueFeedback("feedbackMessage", `Se ha encontrado un error recuperando la información, por favor, recarga la página`);
+            setValueFeedback("feedbackSeverity", 'error');
+            setValueFeedback("feedbackOpen", true);
+        };
+    }, [isError])
     //expanded row
     const expandedRowId = watch("expandedRowId");
     const toggleRowExpansion = (id: number) => {
         setValue("expandedRowId", expandedRowId === id ? null : id);
     };
     //modales
-        //create
+    //create
     const modalOpenCreate = watch("modalOpenCreate");
     const handleOpenCreateModal = () => setValue("modalOpenCreate", true);
     const handleCloseCreateModal = () => {
         setValue("modalOpenCreate", false);
         refetch();
     };
-        //selected row
+    //selected row
     const selectedRowId = watch("selectedRowId");
     const selectedRowName = watch("selectedRowName");
     const selectedRow = watch("selectedRow");
-        //delete
+    //delete
     const modalOpenDelete = watch("modalOpenDelete");
     const handleOpenDeleteModal = (id: number, name: string) => {
         setValue("selectedRowId", id);
@@ -214,7 +221,7 @@ export default function ABMScholarTable({ usercareers, scholarships, laboratory_
         setValue("modalOpenDelete", false);
         refetch();
     };
-        //edit
+    //edit
     const modalOpenEdit = watch("modalOpenEdit");
     const handleOpenEditModal = (row: fetchedScholar) => {
         setValue("selectedRow", row);
@@ -229,25 +236,25 @@ export default function ABMScholarTable({ usercareers, scholarships, laboratory_
             <div className="flex flex-col md:flex-row justify-center text-gray-700">
                 <div className="flex flex-row gap-2 h-14">
                     <ButtonGroup variant="outlined" color="inherit">
-                        <Button 
-                            variant="outlined" 
+                        <Button
+                            variant="outlined"
                             color="inherit"
-                            disableElevation 
+                            disableElevation
                             endIcon={<FilterAltIcon />}
-                            onClick={handleFilterClick} 
+                            onClick={handleFilterClick}
                         >
                             Filtros
                         </Button>
-                        <Button 
-                            variant="outlined" 
+                        <Button
+                            variant="outlined"
                             color="error"
-                            disableElevation 
+                            disableElevation
                             onClick={handleClearFilters}
                         >
-                            <FilterAltOffIcon/>
+                            <FilterAltOffIcon />
                         </Button>
                     </ButtonGroup>
-                    <div className="flex grow"/>
+                    <div className="flex grow" />
                     <div className="flex block md:hidden">
                         <Button
                             variant="contained"
@@ -271,7 +278,7 @@ export default function ABMScholarTable({ usercareers, scholarships, laboratory_
                 </Menu>
                 <form className="flex items-center justify-start mt-4 md:mt-0 md:w-2/6">
                     {showSearchForm && (
-                        <TextField 
+                        <TextField
                             id="search"
                             name="search"
                             label="Buscar por Nombre"
@@ -284,34 +291,34 @@ export default function ABMScholarTable({ usercareers, scholarships, laboratory_
                         />
                     )}
                     {showScholarshipTypeFilter && (
-                        <TextField 
-                            id="scholarship" 
-                            name="scholarship" 
-                            label="Filtrar por Beca" 
-                            type="text" 
-                            variant="outlined" 
+                        <TextField
+                            id="scholarship"
+                            name="scholarship"
+                            label="Filtrar por Beca"
+                            type="text"
+                            variant="outlined"
                             color="warning"
-                            select 
-                            fullWidth 
-                            value={scholarshiptype_id} 
+                            select
+                            fullWidth
+                            value={scholarshiptype_id}
                             onChange={handleScholarshipTypeFilterChange}
-                        > 
+                        >
                             {scholarships.map(scholarshipprop => (
                                 <MenuItem key={scholarshipprop.id} value={scholarshipprop.id}>{scholarshipprop.name}</MenuItem>
                             ))}
                         </TextField>
                     )}
                     {showUserCareerFilter && (
-                        <TextField 
-                            id="career" 
-                            name="career" 
+                        <TextField
+                            id="career"
+                            name="career"
                             label="Filtrar por Carrera"
                             type="text"
                             variant="outlined"
                             color="warning"
-                            select 
+                            select
                             fullWidth
-                            value={usercareer_id} 
+                            value={usercareer_id}
                             onChange={handleUserCareerFilterChange}
                         >
                             {usercareers.map(usercareerprop => (
@@ -359,7 +366,7 @@ export default function ABMScholarTable({ usercareers, scholarships, laboratory_
                                         Nombre
                                     </div>
                                 </TableCell>
-                                <TableCell 
+                                <TableCell
                                     align="center"
                                     onClick={() => handleSort('u.userstatus_id')}
                                     style={{ cursor: 'pointer' }}
@@ -369,7 +376,7 @@ export default function ABMScholarTable({ usercareers, scholarships, laboratory_
                                         Estado
                                     </div>
                                 </TableCell>
-                                <TableCell 
+                                <TableCell
                                     align="right"
                                     width="30%"
                                 >
@@ -407,9 +414,9 @@ export default function ABMScholarTable({ usercareers, scholarships, laboratory_
                                 {data && data.scholars && data.scholars.length > 0 ? (
                                     data.scholars.map((row: any) => (
                                         <React.Fragment key={row.id}>
-                                            <TableRow 
+                                            <TableRow
                                                 onClick={() => toggleRowExpansion(row.id)}
-                                                className={`cursor-pointer ${expandedRowId === row.id ? 'bg-gradient-to-r from-transparent to-transparent via-gray-200' : ''}`}
+                                                className={`cursor-pointer ${expandedRowId === row.id ? 'bg-gradient-to-r from-transparent to-transparent via-gray-100' : ''}`}
                                             >
                                                 <TableCell align="left" size="small" width="40%">
                                                     <div className="text-gray-700 font-medium text-[15px] md:text-lg">
@@ -418,15 +425,15 @@ export default function ABMScholarTable({ usercareers, scholarships, laboratory_
                                                 </TableCell>
                                                 <TableCell align="center" size="small" width="30%">
                                                     <div className="flex text-gray-700 font-medium md:font-bold text-[15px] items-center justify-center">
-                                                        <Chip 
-                                                            label={row.userstatus} 
+                                                        <Chip
+                                                            label={row.userstatus}
                                                             color={
-                                                                row.taskstatusname === "Inactivo"
-                                                                ? "error"
-                                                                : row.taskstatusname === "Pendiente"
-                                                                ? "warning"
-                                                                : "success"
-                                                            } 
+                                                                row.userstatus === "Inactivo"
+                                                                    ? "error"
+                                                                    : row.userstatus === "Pendiente"
+                                                                        ? "warning"
+                                                                        : "success"
+                                                            }
                                                         />
                                                     </div>
                                                 </TableCell>
@@ -435,14 +442,16 @@ export default function ABMScholarTable({ usercareers, scholarships, laboratory_
                                                         <IconButton color="inherit" onClick={() => handleOpenEditModal(row)}>
                                                             <EditIcon />
                                                         </IconButton>
-                                                        <IconButton color="error" onClick={() => handleOpenDeleteModal(row.id, row.name)}>
-                                                            <DeleteIcon />
-                                                        </IconButton>
+                                                        {row.userstatus !== "Inactivo" &&
+                                                            <IconButton color="error" onClick={() => handleOpenDeleteModal(row.id, row.name)}>
+                                                                <DeleteIcon />
+                                                            </IconButton>
+                                                        }
                                                     </div>
                                                 </TableCell>
                                             </TableRow>
                                             {expandedRowId === row.id && (
-                                                <TableRow className="bg-gradient-to-r from-transparent to-transparent via-gray-200">
+                                                <TableRow className="bg-gradient-to-r from-transparent to-transparent via-gray-100">
                                                     <TableCell colSpan={3}>
                                                         <div className="flex flex-col w-full">
                                                             <div className="flex gap-1 text-gray-700 font-medium md:text-[17px]">
@@ -488,13 +497,13 @@ export default function ABMScholarTable({ usercareers, scholarships, laboratory_
                                                                 </div>
                                                                 <div className="flex gap-1 md:w-3/6 text-gray-700 font-medium md:text-[17px]">
                                                                     <strong>Fecha de Inhabilitación: </strong>
-                                                                    {row.dropped_at ? 
+                                                                    {row.dropped_at ?
                                                                         new Date(row.dropped_at).toLocaleDateString('es-AR', {
                                                                             year: 'numeric',
                                                                             month: 'long',
                                                                             day: 'numeric'
                                                                         })
-                                                                    : ''}
+                                                                        : ''}
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -527,6 +536,8 @@ export default function ABMScholarTable({ usercareers, scholarships, laboratory_
                     page={page}
                     onPageChange={handleChangePage}
                     onRowsPerPageChange={handleChangeRowsPerPage}
+                    labelRowsPerPage="Filas por página"
+                    labelDisplayedRows={({ from, to, count }) => `${from}-${to} de ${count !== -1 ? count : `más de ${to}`}`}
                 />
             </div>
             <CreateScholarModal
@@ -535,6 +546,7 @@ export default function ABMScholarTable({ usercareers, scholarships, laboratory_
                 usercareers={usercareers}
                 scholarships={scholarships}
                 laboratory_id={laboratory_id}
+                setValueFeedback={setValueFeedback}
             />
             <EditScholarModal
                 open={modalOpenEdit}
@@ -542,12 +554,14 @@ export default function ABMScholarTable({ usercareers, scholarships, laboratory_
                 usercareers={usercareers}
                 scholarships={scholarships}
                 row={selectedRow!}
+                setValueFeedback={setValueFeedback}
             />
             <DeleteScholarModal
                 open={modalOpenDelete}
                 handleClose={handleCloseDeleteModal}
                 id={selectedRowId!}
                 name={selectedRowName!}
+                setValueFeedback={setValueFeedback}
             />
         </main>
     );

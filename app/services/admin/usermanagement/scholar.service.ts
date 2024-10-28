@@ -1,7 +1,7 @@
 "use server"
 
 import { createScholarData, editScholarData, editScholarQuery, fetchedScholar, fetchScholarData, fetchScholarQuery, newScholarQuery } from "@/app/lib/dtos/scholar";
-import { createScholar, editScholar, getScholarsTable } from "@/app/lib/queries/scholar";
+import { createScholar, editScholar, getScholarsTable, hasProject } from "@/app/lib/queries/scholar";
 import { userChangeStatus } from "@/app/lib/queries/user";
 import { getStatusDeactivated, getStatusPending } from "@/app/lib/queries/userstatus";
 import { getTypeScholar } from "@/app/lib/queries/usertype";
@@ -12,6 +12,7 @@ interface APIErrors {
     dni?: string,
     file?: string,
     email?: string,
+    message?: string;
 };
 
 export async function fetchTableData(data: fetchScholarData) {
@@ -31,6 +32,7 @@ export async function fetchTableData(data: fetchScholarData) {
         return response;
     } catch (error) {
         console.error("Error en fetchTableData(Scholar):", error);
+        throw error;
     };
 };
 
@@ -88,11 +90,11 @@ export async function createTableData(data: createScholarData) {
             return { success: true };
         } catch(error) {
             console.error("Error al crear Becario:", error);
-            return { success: false };
+            throw error;
         };
     } catch (error) {
         console.error("Error en createTableData(Scholar):", error);
-        return { success: false };
+        throw error;
     };
 };
 
@@ -135,26 +137,34 @@ export async function editTableData(data: editScholarData) {
             return { success: true };
         } catch(error) {
             console.error("Error al editar Becario:", error);
-            return { success: false };
+            throw error;
         };
     } catch (error) {
         console.error("Error en editTableData(Scholar):", error);
-        return { success: false };
+        throw error;
     };
 };
 
 export async function deactivateTableData(id: number) {
     try {
+        const isAssigned = await hasProject(id);
+        const apiError: APIErrors = {};
+        if ( isAssigned ) {
+            apiError.message = "El becario se encuentra asignado a uno o más proyectos";
+        }
+        if (Object.keys(apiError).length > 0) {
+            return { success: false, apiError: apiError };
+        }
         const newStatus = await getStatusDeactivated();
         try {
             await userChangeStatus(id, newStatus);
             return { success: true };
         } catch(error) {
             console.error("Error al deshabilitar Becario:", error);
-            return { success: false };
+            throw error;
         };
     } catch (error) {
         console.error("Error en deactivateTableData(Scholar):", error);
-        return { success: false };
+        throw error;
     };
 };

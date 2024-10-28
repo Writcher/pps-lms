@@ -16,7 +16,7 @@ import { useMutation } from '@tanstack/react-query';
 import { createTableData } from '@/app/services/historic/historic.service';
 import '@/app/components/globals.css';
 
-export default function CreateHistoricProjectModal({ open, handleClose, historicusercareers, historicscholarships, historicprojecttypes, historicprojectstatus, laboratory_id  }: createModalProps) {
+export default function CreateHistoricProjectModal({ open, handleClose, historicusercareers, historicscholarships, historicprojecttypes, historicprojectstatus, laboratory_id, setValueFeedback  }: createModalProps) {
     const { watch, register, handleSubmit, setValue, reset, formState: { errors } } = useForm<createFormData>({
         defaultValues: {
             year: 0,
@@ -29,10 +29,20 @@ export default function CreateHistoricProjectModal({ open, handleClose, historic
         mutationFn: (data: newHistoricProjectData) => createTableData(data),
         onSuccess: (result) => {
             if (result && result.success) {
+                setValueFeedback("feedbackMessage", `Proyecto histórico creado correctamente`);
+                setValueFeedback("feedbackSeverity", 'success');
+                setValueFeedback("feedbackOpen", true);
                 handleClose();
                 reset();
             };
         },
+        onError: () => {
+            setValueFeedback("feedbackMessage", `Se ha encontrado un error, por favor, intentalo nuevamente`);
+            setValueFeedback("feedbackSeverity", 'error');
+            setValueFeedback("feedbackOpen", true);
+            handleClose();
+            reset();
+        }
     });
     //year
     const añoInicio = 2008;
@@ -104,6 +114,7 @@ export default function CreateHistoricProjectModal({ open, handleClose, historic
                 onSubmit: handleSubmit(onSubmit),
                 onClick: handleDialogClick,
                 className:"custom-scrollbar",
+                elevation: 0,
                 style: { width: '600px', maxWidth: 'none', overflowY: 'auto' }
             }} 
         >
@@ -236,7 +247,7 @@ export default function CreateHistoricProjectModal({ open, handleClose, historic
                                 <div className='flex w-full mb-4 md:mb-0'>
                                     <TextField 
                                         id="name" 
-                                        label="Nombre *"
+                                        label="Nombre y Apellido *"
                                         type="text" 
                                         variant="outlined" 
                                         color="warning" 
@@ -247,7 +258,7 @@ export default function CreateHistoricProjectModal({ open, handleClose, historic
                                             onChange: (event) => handleScholarChange(index, event),
                                         })}
                                         error={!!errors.scholars?.[index]?.name}
-                                        helperText={errors.scholars?.[index]?.name ? errors.scholars[index].name.message : "Ingrese Nombre de Becario"}
+                                        helperText={errors.scholars?.[index]?.name ? errors.scholars[index].name.message : "Ingrese Nombre y Apellido de Becario"}
                                     />
                                 </div>    
                                 <div className='flex w-full mb-4 md:mb-0'>

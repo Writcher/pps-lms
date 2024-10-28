@@ -24,7 +24,7 @@ export async function createAdmin(data: createAdminData)  {
         const existingUserEmail = await client.query(text1, values1);
         const apiErrors: APIErrors = {};
         if (existingUserEmail.rows.length > 0) {
-            apiErrors.email = "Email en uso";
+            apiErrors.email = "Email ya registrado";
         };
         if (Object.keys(apiErrors).length > 0) {
             return { success: false, apiError: apiErrors };

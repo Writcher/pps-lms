@@ -264,11 +264,12 @@ export default function GuestProjectTable({ usercareers, scholarships, projectty
         <main className="flex flex-col gap-2 w-full h-full">
             <div className="flex flex-col md:flex-row justify-center text-gray-700">
                 <div className="flex flex-row gap-2 h-14">
-                    <ButtonGroup variant="outlined" color="inherit">
+                    <ButtonGroup variant="outlined" color="inherit" className="w-full">
                         <Button
                             variant="outlined"
                             color="inherit"
                             disableElevation
+                            className="!w-full md:!w-auto"
                             endIcon={<FilterAltIcon />}
                             onClick={handleFilterClick}
                         >
@@ -278,6 +279,7 @@ export default function GuestProjectTable({ usercareers, scholarships, projectty
                             variant="outlined"
                             color="error"
                             disableElevation
+                            className="!w-full md:!w-auto"
                             onClick={handleClearFilters}
                         >
                             <FilterAltOffIcon />
@@ -437,7 +439,7 @@ export default function GuestProjectTable({ usercareers, scholarships, projectty
                                                 };
                                                 return (
                                                     <React.Fragment key={row.id}>
-                                                        <Card className="flex flex-col bg-gray-100 shadow-none border border-gray-400">
+                                                        <Card className="flex flex-col shadow-none border border-gray-400">
                                                             <CardContent>
                                                                 <div className="flex flex-col gap-2">
                                                                     <div className="flex flex-row items-center">
@@ -485,6 +487,8 @@ export default function GuestProjectTable({ usercareers, scholarships, projectty
                     page={page}
                     onPageChange={handleChangePage}
                     onRowsPerPageChange={handleChangeRowsPerPage}
+                    labelRowsPerPage="Tarjetas por página"
+                    labelDisplayedRows={({ from, to, count }) => `${from}-${to} de ${count !== -1 ? count : `más de ${to}`}`}
                 />
             </div>
         </main>

@@ -19,14 +19,36 @@ interface APIError {
     name?: string
 };
 
-export default function CreateModal({ open, handleClose, table }: createModalProps) {
+export default function CreateModal({ open, handleClose, table, setValueFeedback }: createModalProps) {
     const { register, handleSubmit, reset, formState: { errors } } = useForm<createFormData>();
     const [apiError, setApiError] = useState<APIError>({});
     const mutation = useMutation({
         mutationFn: (data: createABMQuery) => createTableData(data),
         onSuccess: (result) => {
             if (result && result.success) {
-                handleClose();
+                setValueFeedback("feedbackMessage", `${(() => {
+                    switch (table) {
+                        case "supplytype":
+                            return "Tipo de Insumo creado";
+                        case "projecttype":
+                            return "Tipo de Proyecto creado";
+                        case "supplystatus":
+                            return "Estado de Insumo creado";
+                        case "projectstatus":
+                            return "Estado de Proyecto creado";
+                        case "scholarshiptype":
+                            return "Tipo de Beca creado";
+                        case "grade":
+                            return "Calificación creada";
+                        case "usercareer":
+                            return "Carrera creada";
+                        default:
+                            return "";
+                    }
+                })()} correctamente`);
+                setValueFeedback("feedbackSeverity", 'success');
+                setValueFeedback("feedbackOpen", true);
+                handleExit();
                 reset();
             } else if (result) {
                 if (result.apiError) {
@@ -34,14 +56,18 @@ export default function CreateModal({ open, handleClose, table }: createModalPro
                 };
             };
         },
-        onError: (error: APIError) => {
-            setApiError({ name: error.name });
+        onError: () => {
+            setValueFeedback("feedbackMessage", `Se ha encontrado un error, por favor, intentalo nuevamente`);
+            setValueFeedback("feedbackSeverity", 'error');
+            setValueFeedback("feedbackOpen", true);
+            handleExit();
+            reset();
         }
     });
     const onSubmit: SubmitHandler<createFormData> = (data) => {
-        mutation.mutate({ 
-            name: data.name, 
-            table 
+        mutation.mutate({
+            name: data.name,
+            table
         });
     };
     const handleExit = () => {
@@ -66,13 +92,14 @@ export default function CreateModal({ open, handleClose, table }: createModalPro
                 component: 'form',
                 onSubmit: handleSubmit(onSubmit),
                 onClick: handleDialogClick,
-                style: { width: '600px', maxWidth: 'none' }
+                elevation: 0,
+                    style: { width: '600px', maxWidth: 'none' }
             }}
         >
             <div className='flex flex-col m-2'>
                 <DialogTitle>
                     <div className='text-gray-700 items-center font-medium text-2xl md:text-3xl mb-2'>
-                        Crear nuev  
+                        Crear nuev
                         {(() => {
                             switch (table) {
                                 case "supplytype":
@@ -104,9 +131,9 @@ export default function CreateModal({ open, handleClose, table }: createModalPro
                             variant="outlined"
                             color="warning"
                             fullWidth
-                            {...register("name", { 
-                                    required: "Este campo es requerido" 
-                                }
+                            {...register("name", {
+                                required: "Este campo es requerido"
+                            }
                             )}
                             error={!!errors.name || !!apiError.name}
                             helperText={errors.name ? errors.name.message : apiError.name ? apiError.name : "Nombre de Nuevo Elemento"}
@@ -117,7 +144,7 @@ export default function CreateModal({ open, handleClose, table }: createModalPro
                     <div className='flex flex-row m-3'>
                         <div className='flex flex-row justify-center gap-4'>
                             <Button variant="contained" color="error" disableElevation endIcon={<CloseIcon />} onClick={handleExit}>CANCELAR</Button>
-                            <Button variant="contained" color="success" disableElevation endIcon={mutation.isPending ? <CircularProgress color="warning" size={26}/> : <SaveIcon />} type="submit" disabled={mutation.isPending}>GUARDAR</Button>
+                            <Button variant="contained" color="success" disableElevation endIcon={mutation.isPending ? <CircularProgress color="warning" size={26} /> : <SaveIcon />} type="submit" disabled={mutation.isPending}>GUARDAR</Button>
                         </div>
                     </div>
                 </DialogActions>

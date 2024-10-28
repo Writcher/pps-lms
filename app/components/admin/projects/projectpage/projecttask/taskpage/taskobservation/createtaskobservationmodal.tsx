@@ -15,15 +15,25 @@ import CircularProgress from '@mui/material/CircularProgress';
 import { createTaskObservationData, createTaskObservationFormData, createTaskObservationModalProps } from '@/app/lib/dtos/observation';
 import { createTaskObservation } from '@/app/services/projects/projects.service';
 
-export default function CreateObservationModal({ open, handleClose, project_id, task_id, current_id }: createTaskObservationModalProps) {
+export default function CreateObservationModal({ open, handleClose, project_id, task_id, current_id, setValueFeedback }: createTaskObservationModalProps) {
     const { register, handleSubmit, reset, formState: { errors } } = useForm<createTaskObservationFormData>();
     const mutation = useMutation({
         mutationFn: (data: createTaskObservationData) => createTaskObservation(data),
         onSuccess: (result) => {
             if (result && result.success) {
-                handleClose();
+                setValueFeedback("feedbackMessage", `Observación creada correctamente`);
+                setValueFeedback("feedbackSeverity", 'success');
+                setValueFeedback("feedbackOpen", true);
+                handleExit();
                 reset();
             };
+        },
+        onError: () => {
+            setValueFeedback("feedbackMessage", `Se ha encontrado un error, por favor, intentalo nuevamente`);
+            setValueFeedback("feedbackSeverity", 'error');
+            setValueFeedback("feedbackOpen", true);
+            handleExit();
+            reset();
         }
     });
     const onSubmit: SubmitHandler<createTaskObservationFormData> = (data) => {
@@ -55,7 +65,8 @@ export default function CreateObservationModal({ open, handleClose, project_id, 
                 component: 'form',
                 onSubmit: handleSubmit(onSubmit),
                 onClick: handleDialogClick,
-                style: { width: '600px', maxWidth: 'none' }
+                elevation: 0,
+                    style: { width: '600px', maxWidth: 'none' }
             }}
         >
             <div className='flex flex-col m-2'>

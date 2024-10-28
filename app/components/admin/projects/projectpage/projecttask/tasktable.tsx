@@ -19,7 +19,7 @@ import CreateTaskModal from "./createprojecttaskmodal";
 import { useRouter } from "next/navigation";
 import InfoIcon from '@mui/icons-material/Info';
 
-export default function ProjectTaskTable({ project_id }: projectTaskTableProps) {
+export default function ProjectTaskTable({ id, setValueFeedback }: projectTaskTableProps) {
     const { watch, setValue, getValues, reset } = useForm<projectTaskFormData>({
         defaultValues: {
             tasks: [],
@@ -34,11 +34,18 @@ export default function ProjectTaskTable({ project_id }: projectTaskTableProps) 
     const loadMoreDisabled = watch("loadMoreDisabled");
     const tasks = watch("tasks");
     const page = watch("page");
-    const { data, isLoading, refetch } = useQuery({
-        queryKey: ['fetchProjectTasks', project_id, page],
-        queryFn: () => fetchProjectTasks(project_id, page),
+    const { data, isLoading, refetch, isError } = useQuery({
+        queryKey: ['fetchProjectTasks', id, page],
+        queryFn: () => fetchProjectTasks(id, page),
         refetchOnWindowFocus: false,
     });
+    useEffect(() => {
+        if (isError) {
+            setValueFeedback("feedbackMessage", `Se ha encontrado un error recuperando tareas, por favor, recarga la página`);
+            setValueFeedback("feedbackSeverity", 'error');
+            setValueFeedback("feedbackOpen", true);
+        };
+    }, [isError])
     useEffect(() => {
         if (data) {
             const existingTasks = getValues("tasks") || [];
@@ -73,7 +80,15 @@ export default function ProjectTaskTable({ project_id }: projectTaskTableProps) 
                 const existingTasks = getValues("tasks");
                 const updatedTasks = existingTasks.filter(task => task.id !== variables.id);
                 setValue("tasks", updatedTasks);
+                setValueFeedback("feedbackMessage", `Tarea eliminada correctamente`);
+                setValueFeedback("feedbackSeverity", 'success');
+                setValueFeedback("feedbackOpen", true);
             };
+        },
+        onError: () => {
+            setValueFeedback("feedbackMessage", `Se ha encontrado un error, por favor, intentalo nuevamente`);
+            setValueFeedback("feedbackSeverity", 'error');
+            setValueFeedback("feedbackOpen", true);
         }
     });
     const handleDelete = (id: number) => {
@@ -84,10 +99,10 @@ export default function ProjectTaskTable({ project_id }: projectTaskTableProps) 
     //router init
     const router = useRouter();
     const handleCalendarClick = () => {
-        router.push(`/admin/projects/${project_id}/calendar`);
+        router.push(`/admin/projects/${id}/calendar`);
     };
     const handleCardClick = (task_id: number) => {
-        router.push(`/admin/projects/${project_id}/${task_id}`);
+        router.push(`/admin/projects/${id}/${task_id}`);
     };
     return (
         <div className="flex flex-col w-full h-full gap-4">
@@ -98,26 +113,25 @@ export default function ProjectTaskTable({ project_id }: projectTaskTableProps) 
                 <div className="flex grow" />
                 <div className="flex flex-row justify-end mr-2 gap-2 w-full">
                     <div className="flex">
-                        <Button variant="outlined" color="inherit" disableElevation fullWidth endIcon={<CalendarMonthIcon />} onClick={handleCalendarClick}>CALENDARIO</Button>
+                        <Button variant="outlined" color="inherit" disableElevation fullWidth endIcon={<CalendarMonthIcon />} onClick={handleCalendarClick} disabled={isLoading || isError}>CALENDARIO</Button>
                     </div>
                     <div className="flex">
-                        <Button variant="contained" color="success" disableElevation fullWidth endIcon={<AddIcon />} onClick={handleOpenCreateModal}>AÑADIR</Button>
+                        <Button variant="contained" color="success" disableElevation fullWidth endIcon={<AddIcon />} onClick={handleOpenCreateModal} disabled={isLoading || isError}>AÑADIR</Button>
                     </div>
                 </div>
             </div>
-            <div className="flex flex-grow h-[300px] overflow-y-auto custom-scrollbar">
-                {isLoading ?
+            <div className="flex flex-grow h-[20rem] overflow-y-auto custom-scrollbar">
+                {isLoading || isError ?
                     (
                         <div className="flex flex-col gap-2 w-full h-full mr-2">
-                            <Skeleton variant="rectangular" width="100%" height="50%" className="rounded" />
-                            <Skeleton variant="rectangular" width="100%" height="50%" className="rounded" />
+                            <Skeleton variant="rectangular" width="100%" height="100%" className="rounded" />
                         </div>
                     ) : (
                         <Masonry columns={{xs: 1, md: 2}} spacing={1}>
                             {tasks && tasks.length > 0 ? (
                                 tasks.map((row: any) => (
                                     <React.Fragment key={row.id}>
-                                        <Card className="bg-gray-100 shadow-none border border-gray-400">
+                                        <Card className="shadow-none border border-gray-400">
                                             <CardContent>
                                                 <div className="flex flex-col gap-2">
                                                     <div className="flex flex-row items-center justify-center">
@@ -185,7 +199,7 @@ export default function ProjectTaskTable({ project_id }: projectTaskTableProps) 
                 <div className="flex text-gray-800 mr-2">
                     <Gray800Tooltip title={loadMoreDisabled ? "No hay más tareas!" : ""} arrow>
                         <span>
-                            <Button variant="outlined" color="inherit" disableElevation endIcon={<AddIcon />} onClick={handleLoadMore} disabled={loadMoreDisabled}>CARGAR MÁS TAREAS</Button>
+                            <Button variant="outlined" color="inherit" disableElevation endIcon={<AddIcon />} onClick={handleLoadMore} disabled={loadMoreDisabled || isLoading || isError}>CARGAR MÁS TAREAS</Button>
                         </span>
                     </Gray800Tooltip>
                 </div>
@@ -193,7 +207,8 @@ export default function ProjectTaskTable({ project_id }: projectTaskTableProps) 
             <CreateTaskModal
                 open={modalOpenCreate}
                 handleClose={handleCloseCreateModal}
-                project_id={project_id}
+                project_id={id}
+                setValueFeedback={setValueFeedback}
             />
         </div>
     );

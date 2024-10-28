@@ -4,19 +4,20 @@ import Button from "@mui/material/Button";
 import AddIcon from '@mui/icons-material/Add';
 import { useForm } from "react-hook-form";
 import { deleteObservationData, projectObservationFormData, projectObservationTableProps } from "@/app/lib/dtos/observation";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import CardContent from "@mui/material/CardContent";
 import Card from "@mui/material/Card";
 import IconButton from "@mui/material/IconButton";
 import DeleteIcon from '@mui/icons-material/Delete';
-import { deleteObservation, fetchProjectObservations } from "@/app/services/projects/projects.service";
+import { deleteObservation, fetchProjectObservations, fetchProjectScholarsByProjectId } from "@/app/services/projects/projects.service";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import Masonry from "@mui/lab/Masonry";
 import { Skeleton } from "@mui/material";
 import CreateObservationModal from "./createprojectobservationmodal";
 import Gray800Tooltip from "../../utils";
+import convertToLinks from "@/app/components/converttohtml";
 
-export default function ProjectObservationTable({ project_id, scholar_ids, current_id }: projectObservationTableProps) {
+export default function ProjectObservationTable({ id, current_id, setValueFeedback }: projectObservationTableProps) {
     const { watch, setValue, getValues, reset } = useForm<projectObservationFormData>({
         defaultValues: {
             observations: [],
@@ -27,15 +28,37 @@ export default function ProjectObservationTable({ project_id, scholar_ids, curre
             page: 1
         }
     });
+    //fetch scholar ids
+    const { data: projectScholarsData, isLoading: projectScholarsDataLoading, refetch: projectScholarsDataRefetch } = useQuery({
+        queryKey: ['fetchProjectScholarsByProjectId', id],
+        queryFn: () => fetchProjectScholarsByProjectId(id),
+        refetchOnWindowFocus: false,
+        refetchOnMount: false
+    });
+    const [scholarIds, setScholarIds] = useState<number[]>([]);
+    useEffect(() => {
+        if (projectScholarsData && projectScholarsData.scholars && !projectScholarsDataLoading && !isError) {
+            setScholarIds(projectScholarsData.scholars.map(scholar => scholar.id));
+        } else {
+            setScholarIds([]);
+        };
+    }, [projectScholarsData, projectScholarsDataLoading])
     //fetch observations
     const loadMoreDisabled = watch("loadMoreDisabled");
     const observations = watch("observations");
     const page = watch("page");
-    const { data, isLoading, refetch } = useQuery({
-        queryKey: ['fetchProjectObservations', project_id, page],
-        queryFn: () => fetchProjectObservations(project_id, page),
+    const { data, isLoading, refetch, isError } = useQuery({
+        queryKey: ['fetchProjectObservations', id, page],
+        queryFn: () => fetchProjectObservations(id, page),
         refetchOnWindowFocus: false,
     });
+    useEffect(() => {
+        if (isError) {
+            setValueFeedback("feedbackMessage", `Se ha encontrado un error recuperando observaciones, por favor, recarga la página`);
+            setValueFeedback("feedbackSeverity", 'error');
+            setValueFeedback("feedbackOpen", true);
+        };
+    }, [isError])
     useEffect(() => {
         if (data) {
             const existingObservations = getValues("observations") || [];
@@ -70,7 +93,15 @@ export default function ProjectObservationTable({ project_id, scholar_ids, curre
                 const existingObservations = getValues("observations");
                 const updatedObservations = existingObservations.filter(observation => observation.id !== variables.id);
                 setValue("observations", updatedObservations);
+                setValueFeedback("feedbackMessage", `Observación eliminada correctamente`);
+                setValueFeedback("feedbackSeverity", 'success');
+                setValueFeedback("feedbackOpen", true);
             };
+        },
+        onError: () => {
+            setValueFeedback("feedbackMessage", `Se ha encontrado un error, por favor, intentalo nuevamente`);
+            setValueFeedback("feedbackSeverity", 'error');
+            setValueFeedback("feedbackOpen", true);
         }
     });
     const handleDelete = (id: number) => {
@@ -86,27 +117,26 @@ export default function ProjectObservationTable({ project_id, scholar_ids, curre
                 </div>
                 <div className="flex grow" />
                 <div className="flex mr-2">
-                    <Button variant="contained" color="success" disableElevation endIcon={<AddIcon />} onClick={handleOpenCreateModal}>AÑADIR</Button>
+                    <Button variant="contained" color="success" disableElevation endIcon={<AddIcon />} onClick={handleOpenCreateModal} disabled={isLoading || isError}>AÑADIR</Button>
                 </div>
             </div>
-            <div className="flex flex-grow h-[300px] overflow-y-auto custom-scrollbar">
-                {isLoading ?
+            <div className="flex flex-grow h-[20rem] overflow-y-auto custom-scrollbar">
+                {isLoading || isError ?
                     (
                         <div className="flex flex-col gap-2 w-full h-full mr-2">
-                            <Skeleton variant="rectangular" width="100%" height="50%" className="rounded"/>
-                            <Skeleton variant="rectangular" width="100%" height="50%" className="rounded"/>
+                            <Skeleton variant="rectangular" width="100%" height="100%" className="rounded" />
                         </div>
                     ) : (
-                        <Masonry columns={{xs: 1, md: 2}} spacing={1}>
+                        <Masonry columns={{ xs: 1, md: 2 }} spacing={1}>
                             {observations && observations.length > 0 ? (
                                 observations.map((row: any) => (
                                     <React.Fragment key={row.id}>
-                                        <Card className="bg-gray-100 shadow-none border border-gray-400">
+                                        <Card className="shadow-none border border-gray-400">
                                             <CardContent>
                                                 <div className="flex flex-col gap-1">
                                                     <div className="flex flex-row items-center justify-center gap-1">
                                                         <div className="flex text-gray-700 font-medium md:font-bold text-[15px]">
-                                                             {row.author_name}
+                                                            {row.author_name}
                                                         </div>
                                                         <div className="flex text-gray-700 font-medium md:font-bold text-[15px]">
                                                             el  {new Date(row.created_at).toLocaleDateString('es-AR', {
@@ -120,9 +150,10 @@ export default function ProjectObservationTable({ project_id, scholar_ids, curre
                                                             <DeleteIcon />
                                                         </IconButton>
                                                     </div>
-                                                    <div className="flex-grow text-gray-700 font-medium text-[15px] break-words">
-                                                        {row.content}
-                                                    </div>
+                                                    <div
+                                                        className="flex-grow text-gray-700 font-medium text-[15px] break-words"
+                                                        dangerouslySetInnerHTML={{ __html: convertToLinks(row.content) }}
+                                                    />
                                                 </div>
                                             </CardContent>
                                         </Card>
@@ -140,7 +171,7 @@ export default function ProjectObservationTable({ project_id, scholar_ids, curre
                 <div className="flex text-gray-800 mr-2">
                     <Gray800Tooltip title={loadMoreDisabled ? "No hay más observaciones!" : ""} arrow>
                         <span>
-                            <Button variant="outlined" color="inherit" disableElevation endIcon={<AddIcon />} onClick={handleLoadMore} disabled={loadMoreDisabled}>CARGAR MÁS OBSERVACIONES</Button>
+                            <Button variant="outlined" color="inherit" disableElevation endIcon={<AddIcon />} onClick={handleLoadMore} disabled={loadMoreDisabled || isLoading || isError}>CARGAR MÁS OBSERVACIONES</Button>
                         </span>
                     </Gray800Tooltip>
                 </div>
@@ -148,9 +179,10 @@ export default function ProjectObservationTable({ project_id, scholar_ids, curre
             <CreateObservationModal
                 open={modalOpenCreate}
                 handleClose={handleCloseCreateModal}
-                project_id={project_id}
-                scholar_ids={scholar_ids}
+                project_id={id}
+                scholar_ids={scholarIds}
                 current_id={current_id}
+                setValueFeedback={setValueFeedback}
             />
         </div>
     );

@@ -15,7 +15,7 @@ import { createFormData, createModalProps, newSupplyData } from '@/app/lib/dtos/
 import { useMutation } from '@tanstack/react-query';
 import { createTableData } from '@/app/services/inventory/inventory.service';
 
-export default function CreateSupplyModal({ open, handleClose, supplytypes, supplystatuses, laboratory_id }: createModalProps) {
+export default function CreateSupplyModal({ open, handleClose, supplytypes, supplystatuses, laboratory_id, setValueFeedback }: createModalProps) {
     const { register, handleSubmit, reset, formState: { errors }, watch } = useForm<createFormData>({
         defaultValues: {
             year: 0,
@@ -27,10 +27,20 @@ export default function CreateSupplyModal({ open, handleClose, supplytypes, supp
         mutationFn: (data: newSupplyData) => createTableData(data),
         onSuccess: (result) => {
             if (result && result.success) {
-                handleClose();
+                setValueFeedback("feedbackMessage", `Insumo creado correctamente`);
+                setValueFeedback("feedbackSeverity", 'success');
+                setValueFeedback("feedbackOpen", true);
+                handleExit();
                 reset();
             };
         },
+        onError: () => {
+            setValueFeedback("feedbackMessage", `Se ha encontrado un error, por favor, intentalo nuevamente`);
+            setValueFeedback("feedbackSeverity", 'error');
+            setValueFeedback("feedbackOpen", true);
+            handleExit();
+            reset();
+        }
     });
     const onSubmit: SubmitHandler<createFormData> = (data) => {
         mutation.mutate({ 
@@ -68,7 +78,8 @@ export default function CreateSupplyModal({ open, handleClose, supplytypes, supp
                 component: 'form',
                 onSubmit: handleSubmit(onSubmit),
                 onClick: handleDialogClick,
-                style: { width: '600px', maxWidth: 'none' }
+                elevation: 0,
+                    style: { width: '600px', maxWidth: 'none' }
             }} 
         >
             <div className='flex flex-col m-2'>
@@ -90,7 +101,7 @@ export default function CreateSupplyModal({ open, handleClose, supplytypes, supp
                                     fullWidth
                                     {...register("name", { required: "Este campo es requerido" })}
                                     error={!!errors.name}
-                                    helperText={errors.name ? errors.name.message : "Ingrese Nombre y Apellido"}
+                                    helperText={errors.name ? errors.name.message : "Ingrese Nombre"}
                                 />
                             </div>                    
                             <div className='flex w-full md:w-2/6'>

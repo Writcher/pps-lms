@@ -27,6 +27,7 @@ export async function fetchTableData(data: fetchGuestData) {
         return response;
     } catch (error) {
         console.error("Error en fetchTableData(Guest):", error);
+        throw error;
     };
 };
 
@@ -62,11 +63,11 @@ export async function createTableData(data: createGuestData) {
             return { success: true };
         } catch(error) {
             console.error("Error al crear Invitado:", error);
-            return { success: false };
+            throw error;
         };
     } catch (error) {
         console.error("Error en createTableData(Guest):", error);
-        return { success: false };
+        throw error;
     };
 };
 
@@ -84,12 +85,12 @@ export async function deleteTableData(id: number) {
         try {
             await dropGuest(id);
             return { success: true };
-        } catch(error) {
+        } catch (error) {
             console.error("Error al eliminar Invitado:", error);
-            return { success: false };
+            throw error;
         };
     } catch (error) {
         console.error("Error en deleteTableData(Guest):", error);
-        return { success: false };
+        throw error;
     };
 };

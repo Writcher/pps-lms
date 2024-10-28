@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Button from "@mui/material/Button";
 import Dialog from "@mui/material/Dialog";
 import DialogActions from "@mui/material/DialogActions";
@@ -11,16 +11,34 @@ import { deactivateTableData } from '@/app/services/admin/usermanagement/scholar
 import { useForm } from 'react-hook-form';
 import { deleteModalProps } from '@/app/lib/dtos/scholar';
 import CircularProgress from '@mui/material/CircularProgress';
+import Alert from '@mui/material/Alert';
 
-export default function DeleteScholarModal({ open, handleClose, id, name }: deleteModalProps) {
+interface APIError {
+    message?: string,
+};
+
+export default function DeleteScholarModal({ open, handleClose, id, name, setValueFeedback }: deleteModalProps) {
     const { handleSubmit } = useForm();
+    const [apiError, setApiError] = useState<APIError>({});
     const mutation = useMutation({
         mutationFn: () => deactivateTableData(id),
-        onSuccess: () => {
-            handleClose();
+        onSuccess: (result) => {
+            if (result && result.success) {
+                setValueFeedback("feedbackMessage", `Invitado eliminado correctamente`);
+                setValueFeedback("feedbackSeverity", 'success');
+                setValueFeedback("feedbackOpen", true);
+                handleClose();
+            } else if (result) {
+                if (result.apiError) {
+                    setApiError(result.apiError);
+                };
+            };
         },
-        onError: (error: Error) => {
-            console.error("Error al crear el ítem:", error);
+        onError: () => {
+            setValueFeedback("feedbackMessage", `Se ha encontrado un error, por favor, intentalo nuevamente`);
+            setValueFeedback("feedbackSeverity", 'error');
+            setValueFeedback("feedbackOpen", true);
+            handleClose();
         }
     });
     const onSubmit = () => {
@@ -43,6 +61,7 @@ export default function DeleteScholarModal({ open, handleClose, id, name }: dele
                     component: 'form',
                     onSubmit: handleSubmit(onSubmit),
                     onClick: handleDialogClick,
+                    elevation: 0,
                     style: { width: '600px', maxWidth: 'none' }
                 }} 
             >
@@ -57,6 +76,7 @@ export default function DeleteScholarModal({ open, handleClose, id, name }: dele
                             <div className='text-gray-700 font-medium text-xl mb-2'>
                                 Esto inhabilitará la cuenta del becario, ¿Esta seguro?
                             </div>
+                            {apiError.message && <Alert severity="error" sx={{ fontSize: '1.05rem' }}>{apiError.message}</Alert>}
                         </div>
                     </DialogContent>
                     <DialogActions>

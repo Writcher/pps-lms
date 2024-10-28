@@ -1,3 +1,4 @@
+import { UseFormSetValue } from "react-hook-form";
 import { supplyStatus } from "./supplystatus";
 import { supplyType } from "./supplytype";
 
@@ -60,6 +61,7 @@ export type createModalProps = {
     supplytypes: supplyType[];
     supplystatuses: supplyStatus[];
     laboratory_id: number;
+    setValueFeedback: UseFormSetValue<{ feedbackOpen: boolean, feedbackSeverity: 'success' | 'error', feedbackMessage: string }>
 };
 
 export type createFormData = {
@@ -87,6 +89,7 @@ export type editModalProps = {
     supplytypes: supplyType[];
     supplystatuses: supplyStatus[];
     row: fetchedSupply;
+    setValueFeedback: UseFormSetValue<{ feedbackOpen: boolean, feedbackSeverity: 'success' | 'error', feedbackMessage: string }>
 };
 
 export type editFormData = createFormData;
@@ -107,4 +110,5 @@ export type deleteSupplyModalProps = {
     handleClose: () => void;
     id: number;
     name: string;
-}
+    setValueFeedback: UseFormSetValue<{ feedbackOpen: boolean, feedbackSeverity: 'success' | 'error', feedbackMessage: string }>
+};

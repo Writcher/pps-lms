@@ -19,14 +19,17 @@ interface APIError {
     message?: string,
 };
 
-export default function DeleteGuestModal({ open, handleClose, id, name }: deleteModalProps) {
+export default function DeleteGuestModal({ open, handleClose, id, name, setValueFeedback }: deleteModalProps) {
     const { handleSubmit, reset } = useForm();
     const [apiError, setApiError] = useState<APIError>({});
     const mutation = useMutation({
         mutationFn: () => deleteTableData(id),
         onSuccess: (result) => {
             if (result && result.success) {
-                handleClose();
+                setValueFeedback("feedbackMessage", `Invitado eliminado correctamente`);
+                setValueFeedback("feedbackSeverity", 'success');
+                setValueFeedback("feedbackOpen", true);
+                handleExit();
                 reset();
             } else if (result) {
                 if (result.apiError) {
@@ -34,9 +37,13 @@ export default function DeleteGuestModal({ open, handleClose, id, name }: delete
                 };
             };
         },
-        onError: (error: APIError) => {
-            setApiError({ message: error.message });
-        },
+        onError: () => {
+            setValueFeedback("feedbackMessage", `Se ha encontrado un error, por favor, intentalo nuevamente`);
+            setValueFeedback("feedbackSeverity", 'error');
+            setValueFeedback("feedbackOpen", true);
+            handleExit();
+            reset();
+        }
     });
     const onSubmit = () => {
         mutation.mutate();
@@ -62,6 +69,7 @@ export default function DeleteGuestModal({ open, handleClose, id, name }: delete
                     component: 'form',
                     onSubmit: handleSubmit(onSubmit),
                     onClick: handleDialogClick,
+                    elevation: 0,
                     style: { width: '600px', maxWidth: 'none' }
                 }} 
             >

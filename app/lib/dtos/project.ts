@@ -1,3 +1,4 @@
+import { UseFormSetValue } from "react-hook-form";
 import { projectStatus } from "./projectstatus";
 import { projectType } from "./projecttype";
 import { fetchedProjectPageScholar } from "./scholar";
@@ -26,8 +27,12 @@ export type projectFormData = {
     //pagination
     page: number;
     rowsPerPage: number;
+    //selected row
+    selectedRowId: number;
+    selectedRowName: string;
     //modals
     modalOpenCreate: boolean;
+    modalOpenDelete: boolean;
 };
 
 export type projectsTableProps = {
@@ -68,6 +73,7 @@ export type createModalProps = {
     projecttypes: projectType[];
     projectstatuses: projectStatus[];
     laboratory_id: number;
+    setValueFeedback: UseFormSetValue<{ feedbackOpen: boolean, feedbackSeverity: 'success' | 'error', feedbackMessage: string }>
 };
 
 export type createFormData = {
@@ -99,6 +105,25 @@ export type fetchedPageProject = {
     scholars: fetchedProjectPageScholar[];
 };
 
+export type fetchedProjectForEdit = {
+    name: string;
+    description: string;
+    projecttype_id: number;
+    projectstatus_id: number;
+    grade_date: Date | null;
+    grade_name: string | null;
+};
+
+export type fethedProjectGrade = {
+    date: Date;
+    name: string;
+};
+
+export type fetchedProjectScholars = {
+    laboratory_id: number;
+    scholars: fetchedProjectPageScholar[];
+};
+
 export type editProjectParams = {
     id: number;
     name: string;
@@ -108,8 +133,8 @@ export type editProjectParams = {
 };
 
 export type editFormProps = {
-    refetch: () => void;
-    project: editProjectParams;
+    id: number;
+    setValueFeedback: UseFormSetValue<{ feedbackOpen: boolean, feedbackSeverity: 'success' | 'error', feedbackMessage: string }>
 };
 
 export type editFormData = {
@@ -117,7 +142,11 @@ export type editFormData = {
     description: string;
     projectstatus_id: number | '';
     projecttype_id: number | '';
+    grade_date: Date | null;
+    grade_name: string | null;
     modalOpenHistoric: boolean;
+    modalOpenGradeHistoric: boolean;
+    modalOpenGrade: boolean;
 };
 
 export type editProjectData = {
@@ -139,4 +168,20 @@ export type historicModalProps = {
     handleClose: () => void;
     id: number;
     name: string;
+    setValueFeedback: UseFormSetValue<{ feedbackOpen: boolean, feedbackSeverity: 'success' | 'error', feedbackMessage: string }>
+};
+
+export type deleteModalProps = {
+    open: boolean;
+    handleClose: () => void;
+    id: number;
+    name: string;
+    setValueFeedback: UseFormSetValue<{ feedbackOpen: boolean, feedbackSeverity: 'success' | 'error', feedbackMessage: string }>
+};
+
+export type gradeHistoryModalProps = {
+    open: boolean;
+    handleClose: () => void;
+    id: number;
+    setValueFeedback: UseFormSetValue<{ feedbackOpen: boolean, feedbackSeverity: 'success' | 'error', feedbackMessage: string }>
 };

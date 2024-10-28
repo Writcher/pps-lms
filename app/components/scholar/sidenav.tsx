@@ -8,8 +8,8 @@ import LogoutIcon from '@mui/icons-material/Logout';
 import IconButton from "@mui/material/IconButton";
 import { getLabById } from "@/app/lib/queries/laboratory";
 import { getTypeScholar } from "@/app/lib/queries/usertype";
-import SideNavQuery from "./sidenavQuery";
 import { doLogout } from "@/app/services/login/login.service";
+import { SideNavLinksScholar } from "./sidenav-links";
 
 export default async function SideNav() {
   const session = await auth();
@@ -37,7 +37,7 @@ export default async function SideNav() {
         </div>
       </Link>
       <div className="flex flex-row grow justify-between md:flex-col overflow-auto custom-scrollbar h-full">
-      <SideNavQuery current_id_number={current_id_number}/>
+      <SideNavLinksScholar current_id_number={current_id_number}/>
         <div className="hidden h-auto w-full grow md:block"/>
         <div className="flex flex-col items-center justify-center w-full md:py-6">
           <p className="flex text-center items-center justify-center text-white font-medium md:justify-start hidden md:block">

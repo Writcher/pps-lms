@@ -1,4 +1,5 @@
 import { Dayjs } from "dayjs";
+import { UseFormSetValue } from "react-hook-form";
 
 export type fetchedPageTask = {
     id: number;
@@ -28,7 +29,8 @@ export type fetchedDetailTask = {
 };
 
 export type projectTaskTableProps = {
-    project_id: number;
+    id: number;
+    setValueFeedback: UseFormSetValue<{ feedbackOpen: boolean, feedbackSeverity: 'success' | 'error', feedbackMessage: string }>
 };
 
 export type projectTaskFormData = {
@@ -43,6 +45,7 @@ export type newProjectTaskModalProps = {
     handleClose: () => void;
     project_id: number;
     start_date_new?: Date;
+    setValueFeedback: UseFormSetValue<{ feedbackOpen: boolean, feedbackSeverity: 'success' | 'error', feedbackMessage: string }>
 };
 
 export type newProjectTaskFormData = {
@@ -101,8 +104,9 @@ export type dragTaskData = {
 export type dragTaskQuery = dragTaskData;
 
 export type editFormProps = {
-    task: fetchedDetailTask;
-    refetch: () => void;
+    id: number;
+    project_id: number;
+    setValueFeedback: UseFormSetValue<{ feedbackOpen: boolean, feedbackSeverity: 'success' | 'error', feedbackMessage: string }>
 };
 
 export type editFormData = {

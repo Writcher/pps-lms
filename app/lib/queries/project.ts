@@ -1,6 +1,7 @@
 import { db } from "@vercel/postgres";
-import { deleteProjectData, editProjectQuery, fetchedPageProject, fetchedTableProject, fetchTableProjectsData, newProjectQuery } from "../dtos/project";
+import { deleteProjectData, editProjectQuery, fetchedPageProject, fetchedProjectForEdit, fetchedProjectScholars, fetchedTableProject, fetchTableProjectsData, fethedProjectGrade, newProjectQuery } from "../dtos/project";
 import { addScholarQuery, removeScholarQuery } from "../dtos/scholar";
+import { gradeProjectQuery } from "../dtos/grade";
 
 const client = db;
 
@@ -11,7 +12,7 @@ export async function getProjectName(id: number) {
         `;
         const values = [id];
         const result = await client.query(text, values);
-        let response =  result.rows;
+        let response = result.rows;
         return response[0].name;
     } catch (error) {
         console.error("Error de Base de Datos:", error);
@@ -56,12 +57,12 @@ export async function getTableProjects(params: fetchTableProjectsData) {
             values.push(projectsearch);
         };
         if (params.projecttype_id !== 0) {
-            filtertext += `AND p.projecttype_id = $${values.length +1}
+            filtertext += `AND p.projecttype_id = $${values.length + 1}
             `;
             values.push(params.projecttype_id);
         };
         if (params.projectstatus_id !== 0) {
-            filtertext += `AND p.projectstatus_id = $${values.length +1}
+            filtertext += `AND p.projectstatus_id = $${values.length + 1}
             `;
             values.push(params.projectstatus_id);
         };
@@ -82,7 +83,7 @@ export async function getTableProjects(params: fetchTableProjectsData) {
                 FROM "projectscholar" psc2
                 JOIN "scholar" s2 ON s2.id = psc2.scholar_id
                 WHERE psc2.project_id = p.id
-                AND s2.scholarshiptype_id = $${values.length +1}
+                AND s2.scholarshiptype_id = $${values.length + 1}
             )
             `;
             values.push(params.scholarshiptype_id);
@@ -93,7 +94,7 @@ export async function getTableProjects(params: fetchTableProjectsData) {
                 FROM "projectscholar" psc2
                 JOIN "scholar" s2 ON s2.id = psc2.scholar_id
                 WHERE psc2.project_id = p.id
-                AND s2.usercareer_id = $${values.length +1}
+                AND s2.usercareer_id = $${values.length + 1}
             )
             `;
             values.push(params.usercareer_id);
@@ -153,7 +154,7 @@ export async function getProjectById(id: number) {
             LEFT JOIN "user" u ON u.id = s.id
             WHERE p.id = $1
         `;
-        const values= [id]
+        const values = [id]
         const grouptext = `
             GROUP BY 
                 p.id, pt.name, ps.name
@@ -167,6 +168,87 @@ export async function getProjectById(id: number) {
     } catch (error) {
         console.error("Error de Base de Datos:", error);
         throw new Error("No se pudo obtener los proyectos");
+    };
+};
+
+export async function getProjectScholarsByProjectId(id: number) {
+    try {
+        let text = `
+            SELECT 
+                p.laboratory_id,
+                COALESCE(
+                    json_agg(
+                        json_build_object(
+                            'id', s.id,
+                            'name', u.name,
+                            'email', u.email,
+                            'file', s.file
+                        )
+                    ) FILTER (WHERE s.id IS NOT NULL), '[]'
+                ) AS scholars
+            FROM "project" p
+            LEFT JOIN "projectscholar" psc ON p.id = psc.project_id
+            LEFT JOIN "scholar" s ON s.id = psc.scholar_id
+            LEFT JOIN "user" u ON u.id = s.id
+            WHERE p.id = $1
+        `;
+        const values = [id]
+        const grouptext = `
+            GROUP BY 
+                p.id
+        `;
+        text += grouptext;
+        const result = await client.query(text, values);
+        return result.rows[0] as fetchedProjectScholars;
+    } catch (error) {
+        console.error("Error de Base de Datos:", error);
+        throw new Error("No se pudo obtener los proyectos");
+    };
+};
+
+export async function getProjectForEditById(id: number) {
+    try {
+        let text = `
+            SELECT  
+                p.name, 
+                p.description,  
+                p.projecttype_id,
+                p.projectstatus_id,
+                pg.date AS grade_date,
+                g.name AS grade_name
+            FROM "project" p
+            LEFT JOIN "projectgrade" pg ON p.id = pg.project_id
+            LEFT JOIN "grade" g ON pg.grade_id = g.id
+            WHERE p.id = $1
+            ORDER BY pg.date DESC
+            LIMIT 1
+        `;
+        const values = [id];
+        const result = await client.query(text, values);
+        return result.rows[0] as fetchedProjectForEdit;
+    } catch (error) {
+        console.error("Error de Base de Datos:", error);
+        throw new Error("No se pudo obtener el proyecto");
+    };
+};
+
+export async function getProjectGrades(id: number) {
+    try {
+        let text = `
+            SELECT  
+                pg.date, 
+                g.name AS name
+            FROM "projectgrade" pg
+            JOIN "grade" g ON pg.grade_id = g.id
+            WHERE pg.project_id = $1
+            ORDER BY pg.date DESC
+        `;
+        const values = [id];
+        const result = await client.query(text, values);
+        return result.rows as fethedProjectGrade[];
+    } catch (error) {
+        console.error("Error de Base de Datos:", error);
+        throw new Error("No se pudo obtener el proyecto");
     };
 };
 
@@ -194,7 +276,7 @@ export async function newProject(params: newProjectQuery) {
         const textcommit = `COMMIT`;
         await client.query(textcommit);
         return { success: true, message: "Instancia creada correctamente" };
-    } catch(error) {
+    } catch (error) {
         console.error("Error de Base de Datos:", error);
         const textrollback = `ROLLBACK`;
         await client.query(textrollback);
@@ -218,7 +300,7 @@ export async function addScholar(params: addScholarQuery) {
         const textcommit = `COMMIT`;
         await client.query(textcommit);
         return { success: true, message: "Becario agregado correctamente" };
-    } catch(error) {
+    } catch (error) {
         console.error("Error de Base de Datos:", error);
         const textrollback = `ROLLBACK`;
         await client.query(textrollback);
@@ -235,7 +317,7 @@ export async function removeScholar(params: removeScholarQuery) {
         const values = [params.scholar_id, params.project_id];
         await client.query(text, values)
         return { success: true, message: "Becario desasociado correctamente" };
-    } catch(error) {
+    } catch (error) {
         console.error("Error de Base de Datos:", error);
         throw new Error("No se pudo quitar el becario");
     };
@@ -308,5 +390,20 @@ export async function dropProject(params: deleteProjectData) {
         const textrollback = `ROLLBACK`;
         await client.query(textrollback);
         throw new Error("No se pudo eliminar la observacion");
+    };
+};
+
+export async function createProjectGrade(params: gradeProjectQuery) {
+    try {
+        const text = `
+        INSERT INTO "projectgrade" (grade_id, project_id)
+        VALUES ($1, $2)
+        `;
+        const values = [params.grade_id, params.project_id];
+        await client.query(text, values)
+        return { success: true };
+    } catch (error) {
+        console.error("Error de Base de Datos:", error);
+        throw new Error("No se pudo calificar el proyecto");
     };
 };
