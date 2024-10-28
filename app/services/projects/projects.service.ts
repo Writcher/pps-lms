@@ -1,12 +1,15 @@
 "use server"
 
+import { fetchedABMItem } from "@/app/lib/dtos/abm";
+import { gradeProjectData } from "@/app/lib/dtos/grade";
 import { createProjectObservationData, createTaskObservationData, deleteObservationData } from "@/app/lib/dtos/observation";
 import { deleteProjectData, editProjectData, fetchedTableProject, fetchTableProjectsData, getTableProjectsQuery, newProjectData } from "@/app/lib/dtos/project";
 import { addScholarData, removeScholarData } from "@/app/lib/dtos/scholar";
 import { createProjectTaskData, deleteTaskData, dragTaskData, editTaskData } from "@/app/lib/dtos/task";
+import { getGrades } from "@/app/lib/queries/grade";
 import { recordHistoricProject } from "@/app/lib/queries/historicproject";
 import { newProjectObservation, newTaskObservation, dropObservation, getProjectObservations, getTaskObservations } from "@/app/lib/queries/observations";
-import { addScholar, newProject, updateProject, getProjectById, getTableProjects, removeScholar, dropProject } from "@/app/lib/queries/project";
+import { addScholar, newProject, updateProject, getProjectById, getTableProjects, removeScholar, dropProject, getProjectForEditById, getProjectScholarsByProjectId, getProjectGrades, createProjectGrade } from "@/app/lib/queries/project";
 import { getProjectStatuses } from "@/app/lib/queries/projectstatus";
 import { getProjectTypes } from "@/app/lib/queries/projecttype";
 import { getAddScholars, getLabScholars } from "@/app/lib/queries/scholar";
@@ -31,6 +34,7 @@ export async function fetchTableData(data: fetchTableProjectsData) {
         return response;
     } catch (error) {
         console.error("Error en fetchTableData(Projects):", error);
+        throw error;
     };
 };
 
@@ -58,6 +62,47 @@ export async function fetchProjectById(id: number) {
         return response;
     } catch (error) {
         console.error("Error en fetchProjectById:", error);
+        throw error;
+    };
+};
+
+export async function fetchProjectForEditById(id: number) {
+    try {
+        const response = await getProjectForEditById(id);
+        return response;
+    } catch (error) {
+        console.error("Error en fetchProjectById:", error);
+        throw error;
+    };
+};
+
+export async function fetchProjectGrades(id: number) {
+    try {
+        const response = await getProjectGrades(id);
+        return response;
+    } catch (error) {
+        console.error("Error en fetchProjectById:", error);
+        throw error;
+    };
+};
+
+export async function fetchGrades() {
+    try {
+        const response = await getGrades();
+        return response as fetchedABMItem[];
+    } catch (error) {
+        console.error("Error en fetchProjectById:", error);
+        throw error;
+    };
+};
+
+export async function fetchProjectScholarsByProjectId(id: number) {
+    try {
+        const response = await getProjectScholarsByProjectId(id);
+        return response;
+    } catch (error) {
+        console.error("Error en fetchProjectById:", error);
+        throw error;
     };
 };
 
@@ -78,11 +123,11 @@ export async function createProject(data: newProjectData) {
             return { success: true };
         } catch (error) {
             console.error("Error al crear proyecto:", error);
-            return { success: false };
+            throw error;
         };
     } catch (error) {
         console.error("Error en createProject(Project):", error);
-        return { success: false };
+        throw error;
     };
 };
 
@@ -93,11 +138,11 @@ export async function editProject(data: editProjectData) {
             return { success: true };
         } catch (error) {
             console.error("Error al editar proyecto:", error);
-            return { success: false };
+            throw error;
         };
     } catch (error) {
         console.error("Error en editProject(Project):", error);
-        return { success: false };
+        throw error;
     } ;
 };
 
@@ -108,11 +153,11 @@ export async function addProjectScholar(data: addScholarData) {
             return { success: true };
         } catch (error) {
             console.error("Error al editar proyecto:", error);
-            return { success: false };
+            throw error;
         };
     } catch (error) {
         console.error("Error en addProjectScholar:", error);
-        return { success: false };
+        throw error;
     } ;
 };
 
@@ -123,11 +168,11 @@ export async function removeProjectScholar(data: removeScholarData) {
             return { success: true };
         } catch (error) {
             console.error("Error al editar proyecto:", error);
-            return { success: false };
+            throw error;
         };
     } catch (error) {
         console.error("Error en addProjectScholar:", error);
-        return { success: false };
+        throw error;
     } ;
 };
 
@@ -137,6 +182,7 @@ export async function fetchProjectObservations(id: number, page: number)  {
         return response;
     } catch (error) {
         console.error("Error en fetchLabScholars:", error);
+        throw error;
     };
 };
 
@@ -147,11 +193,11 @@ export async function createProjectObservation(data: createProjectObservationDat
             return { success: true };
         } catch (error) {
             console.error("Error al crear observacion:", error);
-            return { success: false };
+            throw error;
         };
     } catch (error) {
         console.error("Error en createProjectObservation:", error);
-        return { success: false };
+        throw error;
     };
 };
 
@@ -162,11 +208,11 @@ export async function deleteObservation(data: deleteObservationData) {
             return { success: true };
         } catch (error) {
             console.error("Error al eliminar observación:", error);
-            return { success: false };
+            throw error;
         };
     } catch (error) {
         console.error("Error en deleteObservation:", error);
-        return { success: false };
+        throw error;
     };
 };
 
@@ -176,6 +222,7 @@ export async function fetchProjectTasks(id: number, page: number) {
         return response;
     } catch (error) {
         console.error("Error en fetchProjectTasks:", error);
+        throw error;
     };
 };
 
@@ -186,11 +233,11 @@ export async function createProjectTask(data: createProjectTaskData) {
             return { success: true };
         } catch (error) {
             console.error("Error al crear tarea:", error);
-            return { success: false };
+            throw error;
         };
     } catch (error) {
         console.error("Error en createProjectTask:", error);
-        return { success: false };
+        throw error;
     };
 };
 
@@ -201,11 +248,11 @@ export async function deleteTask(data: deleteTaskData) {
             return { success: true };
         } catch (error) {
             console.error("Error al eliminar tarea:", error);
-            return { success: false };
+            throw error;
         };
     } catch (error) {
         console.error("Error en deleteTask:", error);
-        return { success: false };
+        throw error;
     };
 };
 
@@ -216,11 +263,11 @@ export async function deleteProject(data: deleteProjectData) {
             return { success: true };
         } catch (error) {
             console.error("Error al eliminar tarea:", error);
-            return { success: false };
+            throw error;
         };
     } catch (error) {
         console.error("Error en deleteTask:", error);
-        return { success: false };
+        throw error;
     };
 };
 
@@ -230,6 +277,7 @@ export async function fetchCalendarTasks(id: number, start_date: Date, end_date:
         return response;
     } catch (error) {
         console.error("Error en fetchProjectTasks:", error);
+        throw error;
     };
 };
 
@@ -240,11 +288,11 @@ export async function editCalendarTask(data: dragTaskData) {
             return { success: true };
         } catch (error) {
             console.error("Error al arrastrar tarea:", error);
-            return { success: false };
+            throw error;
         };
     } catch (error) {
         console.error("Error en editCalendarTask:", error);
-        return { success: false };
+        throw error;
     };
 };
 
@@ -264,11 +312,11 @@ export async function editProjectTask(data: editTaskData) {
             return { success: true };
         } catch (error) {
             console.error("Error al editar proyecto:", error);
-            return { success: false };
+            throw error;
         };
     } catch (error) {
         console.error("Error en editProjectTask(Project):", error);
-        return { success: false };
+        throw error;
     } ;
 };
 
@@ -278,6 +326,7 @@ export async function fetchTaskById(id: number, project_id: number) {
         return response;
     } catch (error) {
         console.error("Error en fetchTaskById:", error);
+        throw error;
     };
 };
 
@@ -287,6 +336,7 @@ export async function fetchTaskObservations(project_id: number, task_id: number,
         return response;
     } catch (error) {
         console.error("Error en fetchTaskObservations:", error);
+        throw error;
     };
 };
 
@@ -297,11 +347,11 @@ export async function createTaskObservation(data: createTaskObservationData) {
             return { success: true };
         } catch (error) {
             console.error("Error al crear observacion:", error);
-            return { success: false };
+            throw error;
         };
     } catch (error) {
         console.error("Error en createTaskObservation:", error);
-        return { success: false };
+        throw error;
     };
 };
 
@@ -312,10 +362,25 @@ export async function recordNewHistoricProject(id: number) {
             return { success: true };
         } catch (error) {
             console.error("Error al crear record:", error);
-            return { success: false };
+            throw error;
         };
     } catch (error) {
         console.error("Error en recordNewHistoricProject:", error);
-        return { success: false };
+        throw error;
+    };
+};
+
+export async function gradeProject(data: gradeProjectData) {
+    try {
+        try {
+            await createProjectGrade(data);
+            return { success: true };
+        } catch (error) {
+            console.error("Error al calificar proyecto:", error);
+            throw error;
+        };
+    } catch (error) {
+        console.error("Error en gradeProject:", error);
+        throw error;
     };
 };

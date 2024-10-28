@@ -21,7 +21,7 @@ interface APIErrors {
     email?: string,
 };
 
-export default function EditScholarModal({ open, handleClose, row, usercareers, scholarships }: editModalProps) {
+export default function EditScholarModal({ open, handleClose, row, usercareers, scholarships, setValueFeedback }: editModalProps) {
     const { watch, register, handleSubmit, reset, formState: { errors } } = useForm<editFormData>({
         defaultValues: {
             name: row?.name,
@@ -39,7 +39,10 @@ export default function EditScholarModal({ open, handleClose, row, usercareers, 
         mutationFn: (data: editScholarData) => editTableData(data),
         onSuccess: (result) => {
             if (result && result.success) {
-                handleClose();
+                setValueFeedback("feedbackMessage", `Becario editado correctamente`);
+                setValueFeedback("feedbackSeverity", 'success');
+                setValueFeedback("feedbackOpen", true);
+                handleExit();
                 reset();
             } else if (result) {
                 if (result.apiError) {
@@ -47,9 +50,13 @@ export default function EditScholarModal({ open, handleClose, row, usercareers, 
                 };
             };
         },
-        onError: (error: APIErrors) => {
-            setApiError({ dni: error.dni, file: error.file });
-        },
+        onError: () => {
+            setValueFeedback("feedbackMessage", `Se ha encontrado un error, por favor, intentalo nuevamente`);
+            setValueFeedback("feedbackSeverity", 'error');
+            setValueFeedback("feedbackOpen", true);
+            handleExit();
+            reset();
+        }
     });
     const onSubmit: SubmitHandler<editFormData> = (data) => {
         mutation.mutate({ 
@@ -98,6 +105,7 @@ export default function EditScholarModal({ open, handleClose, row, usercareers, 
                     component: 'form',
                     onSubmit: handleSubmit(onSubmit),
                     onClick: handleDialogClick,
+                    elevation: 0,
                     style: { width: '600px', maxWidth: 'none' }
                 }}
             >

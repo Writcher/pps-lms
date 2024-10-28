@@ -24,6 +24,7 @@ export async function fetchTableData(data: fetchHistoricProjectData) {
         return response;
     } catch (error) {
         console.error("Error en fetchTableData(Historic):", error);
+        throw error;
     };
 };
 
@@ -43,10 +44,10 @@ export async function createTableData(data: newHistoricProjectData) {
             return { success: true };
         } catch (error) {
             console.error("Error al crear proyecto:", error);
-            return { success: false };
+            throw error;
         };
     } catch (error) {
         console.error("Error en createTableData(Historic):", error);
-        return { success: false };
+        throw error;
     };
 };

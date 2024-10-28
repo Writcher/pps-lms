@@ -1,11 +1,15 @@
+import { UseFormSetValue } from "react-hook-form";
+
 export type ABMTableProps = {
     table: string;
+    setValueFeedback: UseFormSetValue<{ feedbackOpen: boolean, feedbackSeverity: 'success' | 'error', feedbackMessage: string }>
 };
 
 export type createModalProps = {
     open: boolean;
     handleClose: () => void;
     table: string;
+    setValueFeedback: UseFormSetValue<{ feedbackOpen: boolean, feedbackSeverity: 'success' | 'error', feedbackMessage: string }>
 };
 
 export type createFormData = {
@@ -27,6 +31,7 @@ export type editModalProps = {
     table: string;
     id: number;
     name: string;
+    setValueFeedback: UseFormSetValue<{ feedbackOpen: boolean, feedbackSeverity: 'success' | 'error', feedbackMessage: string }>
 };
 
 export type editFormData = {

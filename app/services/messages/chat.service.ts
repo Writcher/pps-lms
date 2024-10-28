@@ -1,7 +1,7 @@
 "use server"
 
-import { fetchChatUsersData, fetchedMessages, fetchMessagesData, newMessageQuery, readMessagesData } from "@/app/lib/dtos/message";
-import { countAllUnreadMessages, countUnreadMessages, createMessage, getMessages, readMessage } from "@/app/lib/queries/messages";
+import { deleteMessageData, fetchChatUsersData, fetchedMessages, fetchMessagesData, newMessageQuery, readMessagesData } from "@/app/lib/dtos/message";
+import { countAllUnreadMessages, countUnreadMessages, createMessage, dropMessage, getMessages, readMessage } from "@/app/lib/queries/messages";
 import { getLabScholars } from "@/app/lib/queries/scholar";
 import { getAdmins } from "@/app/lib/queries/user";
 import { getTypeAdmin, getTypeScholar } from "@/app/lib/queries/usertype";
@@ -20,6 +20,7 @@ export async function fetchChatUsers(data: fetchChatUsersData) {
                 return scholarsWithUnreadCount;
             } catch (error) {
                 console.error("Error en fetchChatUsers:", error);
+                throw error;
             };
         } else if (data.usertype_id === scholarType) {
             try {
@@ -31,22 +32,24 @@ export async function fetchChatUsers(data: fetchChatUsersData) {
                 return adminsWithUnreadCount;
             } catch (error) {
                 console.error("Error en fetchChatUsers:", error);
+                throw error;
             };
         } else {
             console.error("Tipo de usuario no reconocido")
         };
     } catch (error) {
         console.error("Error en fetchChatUsers:", error);
+        throw error;
     };
 };
 
 export async function fetchChatMessages(data: fetchMessagesData) {
     try {
-        let response: fetchedMessages[];
-        response = await getMessages(data.sender_id, data.receiver_id);
+        const response = await getMessages(data.sender_id, data.receiver_id, data.page);
         return response;
     } catch (error) {
         console.error("Error en fetchChatUsers:", error);
+        throw error;
     };
 };
 
@@ -76,7 +79,7 @@ export async function setMessagesAsRead(data: readMessagesData) {
 };
 
 export async function sendMessage(data: newMessageQuery) {
-    try { 
+    try {
         const message = {
             content: data.content,
             receiver_id: data.receiver_id,
@@ -85,12 +88,27 @@ export async function sendMessage(data: newMessageQuery) {
         try {
             await createMessage(message);
             return { success: true };
-        } catch(error) {
+        } catch (error) {
             console.error("Error al crear mensaje:", error);
-            return { success: false };
+            throw error;
         };
     } catch (error) {
         console.error("Error en sendMessage:", error);
-        return { success: false };
+        throw error;
+    };
+};
+
+export async function deleteMessage(data: deleteMessageData) {
+    try {
+        try {
+            await dropMessage(data);
+            return { success: true };
+        } catch (error) {
+            console.error("Error al eliminar observación:", error);
+            throw error;
+        };
+    } catch (error) {
+        console.error("Error en deleteObservation:", error);
+        throw error;
     };
 };

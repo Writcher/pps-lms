@@ -65,7 +65,8 @@ export default function CreateLaboratoryModal({ open, handleClose }: createModal
                 component: 'form',
                 onSubmit: handleSubmit(onSubmit),
                 onClick: handleDialogClick,
-                style: { width: '600px', maxWidth: 'none' }
+                elevation: 0,
+                    style: { width: '600px', maxWidth: 'none' }
             }}
         >
             <div className='flex flex-col m-2'>

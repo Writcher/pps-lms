@@ -14,16 +14,26 @@ import CircularProgress from '@mui/material/CircularProgress';
 import { removeScholarData, removeScholarModalProps } from '@/app/lib/dtos/scholar';
 import { removeProjectScholar } from '@/app/services/projects/projects.service';
 
-export default function RemoveScholarModal({ open, handleClose, project_id, scholar_id, scholarname }: removeScholarModalProps) {
+export default function RemoveScholarModal({ open, handleClose, project_id, scholar_id, scholarname, setValueFeedback }: removeScholarModalProps) {
     const { handleSubmit, reset } = useForm();
     const data = { scholar_id, project_id } as removeScholarData;
     const mutation = useMutation({
         mutationFn: () => removeProjectScholar(data),
         onSuccess: (result) => {
             if (result && result.success) {
+                setValueFeedback("feedbackMessage", `Becario desasignado correctamente`);
+                setValueFeedback("feedbackSeverity", 'success');
+                setValueFeedback("feedbackOpen", true);
                 handleClose();
                 reset();
             };
+        },
+        onError: () => {
+            setValueFeedback("feedbackMessage", `Se ha encontrado un error, por favor, intentalo nuevamente`);
+            setValueFeedback("feedbackSeverity", 'error');
+            setValueFeedback("feedbackOpen", true);
+            handleClose();
+            reset();
         }
     });
     const onSubmit = () => {
@@ -46,6 +56,7 @@ export default function RemoveScholarModal({ open, handleClose, project_id, scho
                     component: 'form',
                     onSubmit: handleSubmit(onSubmit),
                     onClick: handleDialogClick,
+                    elevation: 0,
                     style: { width: '600px', maxWidth: 'none' }
                 }} 
             >

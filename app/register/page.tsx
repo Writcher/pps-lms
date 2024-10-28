@@ -1,8 +1,6 @@
-import Button from "@mui/material/Button";
 import LabTrackLogoWhite, { LabTrackLogoBlack } from "../components/labtrack-logo";
-import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft';
 import Link from "next/link";
-import RegisterQuery from "../components/register/registerQuery";
+import RegisterForm from "../components/register/register-form";
 
 export default async function Register() {
     return (
@@ -30,7 +28,7 @@ export default async function Register() {
                     </p>
                 </div>
                 <div className="flex w-screen md:w-full justify-center items-center">
-                    <RegisterQuery />
+                    <RegisterForm />
                 </div>
                 <div className="flex">
                     <strong className="text-gray-700">¿Ya tienes una cuenta? <Link className="text-orange-500" href={"/login"}>Inicia Sesión</Link>.</strong>

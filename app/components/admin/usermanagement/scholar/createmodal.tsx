@@ -22,7 +22,7 @@ interface APIErrors {
     email?: string,
 };
 
-export default function CreateScholarModal({ open, handleClose, usercareers, scholarships, laboratory_id }: createModalPorps) {
+export default function CreateScholarModal({ open, handleClose, usercareers, scholarships, laboratory_id, setValueFeedback }: createModalPorps) {
     const { watch, register, handleSubmit, reset, formState: { errors } } = useForm<createFormData>({
         defaultValues: {
             careerlevel: 0,
@@ -35,7 +35,10 @@ export default function CreateScholarModal({ open, handleClose, usercareers, sch
         mutationFn: (data: createScholarData) => createTableData(data),
         onSuccess: (result) => {
             if (result && result.success) {
-                handleClose();
+                setValueFeedback("feedbackMessage", `Becario creado correctamente`);
+                setValueFeedback("feedbackSeverity", 'success');
+                setValueFeedback("feedbackOpen", true);
+                handleExit();
                 reset();
             } else if (result) {
                 if (result.apiError) {
@@ -43,9 +46,13 @@ export default function CreateScholarModal({ open, handleClose, usercareers, sch
                 };
             };
         },
-        onError: (error: APIErrors) => {
-            setApiError({ dni: error.dni, file: error.file, email: error.email });
-        },
+        onError: () => {
+            setValueFeedback("feedbackMessage", `Se ha encontrado un error, por favor, intentalo nuevamente`);
+            setValueFeedback("feedbackSeverity", 'error');
+            setValueFeedback("feedbackOpen", true);
+            handleExit();
+            reset();
+        }
     });
     const onSubmit: SubmitHandler<createFormData> = (data) => {
         mutation.mutate({ 
@@ -84,7 +91,8 @@ export default function CreateScholarModal({ open, handleClose, usercareers, sch
                 component: 'form',
                 onSubmit: handleSubmit(onSubmit),
                 onClick: handleDialogClick,
-                style: { width: '600px', maxWidth: 'none' }
+                elevation: 0,
+                    style: { width: '600px', maxWidth: 'none' }
             }}
         >
             <div className='flex flex-col m-2'>

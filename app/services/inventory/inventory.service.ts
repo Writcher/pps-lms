@@ -10,6 +10,7 @@ export async function fetchTableData(data: fetchSupplyData) {
         return response;
     } catch (error) {
         console.error("Error en fetchTableData(Inventory):", error);
+        throw error;
     };
 };
 
@@ -28,11 +29,11 @@ export async function createTableData(data: newSupplyData) {
             return { success: true };
         } catch (error) {
             console.error("Error al crear Supply:", error);
-            return { success: false };
+            throw error;
         };
     } catch (error) {
         console.error("Error en createTableData(Supply):", error);
-        return { success: false };
+        throw error;
     };
 };
 
@@ -42,7 +43,7 @@ export async function deleteTableData(id: number) {
         return { success: true };
     } catch(error) {
         console.error("Error en deleteTableData(Supply):", error);
-        return { success: false };
+        throw error;
     };
 };
 
@@ -61,10 +62,10 @@ export async function editTableData(data: editSupplyData) {
             return { success: true };
         } catch (error) {
             console.error("Error al editar Supply:", error);
-            return { success: false };
+            throw error;
         };
     } catch (error) {
         console.error("Error en editTableData(Supply):", error);
-        return { success: false };
+        throw error;
     };
 };

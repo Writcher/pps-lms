@@ -1,5 +1,5 @@
 import { db } from "@vercel/postgres";
-import { fetchedMessages, newMessageQuery } from "../dtos/message";
+import { deleteMessageQuery, fetchedMessages, newMessageQuery } from "../dtos/message";
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
@@ -9,18 +9,32 @@ dayjs.extend(timezone);
 
 const client = db;
 
-export async function getMessages(sender_id: number, receiver_id: number) {
+export async function getMessages(sender_id: number, receiver_id: number, page: number) {
     try {
+        const limit = 30;
+        const offset = (page - 1) * limit;
         const text = `
-        SELECT content, timestamp, sender_id, receiver_id, is_read
+        SELECT id, content, timestamp, sender_id, receiver_id, is_read
         FROM "message"
         WHERE (sender_id = $1 AND receiver_id = $2)
             OR (sender_id = $2 AND receiver_id = $1)
         ORDER BY timestamp ASC
+        LIMIT $3 OFFSET $4
         `;
-        const values = [sender_id, receiver_id];
+        const values = [sender_id, receiver_id, limit, offset];
         const result = await client.query(text, values);
-        return result.rows as fetchedMessages[];
+        const text2 = `
+        SELECT COUNT(*) AS total
+        FROM "message"
+        WHERE (sender_id = $1 AND receiver_id = $2)
+            OR (sender_id = $2 AND receiver_id = $1)
+        `;
+        const values2 = [sender_id, receiver_id];
+        const count = await client.query(text2, values2);
+        return {
+            messages: result.rows as fetchedMessages[],
+            totalMessages: count.rows[0].total as number,
+        };
     } catch (error) {
         console.error("Error de Base de Datos:", error);
         throw new Error("No se pudo obtener el message");
@@ -40,7 +54,7 @@ export async function createMessage(message: newMessageQuery) {
     } catch (error) {
         console.error("Error de Base de Datos:", error);
         throw new Error("No se pudo crear el message");
-    }; 
+    };
 };
 
 export async function readMessage(sender_id: number, receiver_id: number) {
@@ -56,8 +70,9 @@ export async function readMessage(sender_id: number, receiver_id: number) {
     } catch (error) {
         console.error("Error de Base de Datos:", error);
         throw new Error("No se pudo modificar el message");
-    };    
-;}
+    };
+    ;
+}
 
 export async function countUnreadMessages(sender_id: number, receiver_id: number) {
     try {
@@ -71,7 +86,7 @@ export async function countUnreadMessages(sender_id: number, receiver_id: number
     } catch (error) {
         console.error("Error de Base de Datos:", error);
         throw new Error("No se pudo contar los message");
-    };    
+    };
 };
 
 export async function countAllUnreadMessages(receiver_id: number) {
@@ -86,5 +101,19 @@ export async function countAllUnreadMessages(receiver_id: number) {
     } catch (error) {
         console.error("Error de Base de Datos:", error);
         throw new Error("No se pudo contar los message");
-    };    
+    };
+};
+
+export async function dropMessage(params: deleteMessageQuery) {
+    try {
+        const text = `
+        DELETE FROM "message" WHERE id = $1
+        `;
+        const values = [params.id];
+        await client.query(text, values);
+        return { success: true };
+    } catch (error) {
+        console.error("Error de Base de Datos:", error);
+        throw new Error("No se pudo eliminar el mensaje");
+    };
 };

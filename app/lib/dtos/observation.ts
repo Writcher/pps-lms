@@ -1,3 +1,5 @@
+import { UseFormSetValue } from "react-hook-form";
+
 export type fetchedObservations = {
     id: number;
     content: string;
@@ -6,9 +8,9 @@ export type fetchedObservations = {
 };
 
 export type projectObservationTableProps = {
-    scholar_ids: number[];
-    project_id: number;
+    id: number;
     current_id: number;
+    setValueFeedback: UseFormSetValue<{ feedbackOpen: boolean, feedbackSeverity: 'success' | 'error', feedbackMessage: string }>
 };
 
 export type projectObservationFormData = {
@@ -24,6 +26,7 @@ export type newProjectObservationModalProps = {
     handleClose: () => void;
     project_id: number;
     current_id: number;
+    setValueFeedback: UseFormSetValue<{ feedbackOpen: boolean, feedbackSeverity: 'success' | 'error', feedbackMessage: string }>
 };
 
 export type newProjectObservationFormData = {
@@ -49,6 +52,7 @@ export type taskObservationTableProps = {
     task_id: number;
     project_id: number;
     current_id: number;
+    setValueFeedback: UseFormSetValue<{ feedbackOpen: boolean, feedbackSeverity: 'success' | 'error', feedbackMessage: string }>
 };
 
 export type taskObservationFormData = projectObservationFormData;
@@ -59,6 +63,7 @@ export type createTaskObservationModalProps = {
     project_id: number;
     task_id: number;
     current_id: number;
+    setValueFeedback: UseFormSetValue<{ feedbackOpen: boolean, feedbackSeverity: 'success' | 'error', feedbackMessage: string }>
 };
 
 export type createTaskObservationFormData = {

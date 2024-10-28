@@ -15,7 +15,7 @@ import { SubmitHandler, useForm } from 'react-hook-form';
 import { useMutation } from '@tanstack/react-query';
 import { editTableData } from '@/app/services/inventory/inventory.service';
 
-export default function EditSupplyModal({ open, handleClose, supplytypes, supplystatuses, row }: editModalProps) {
+export default function EditSupplyModal({ open, handleClose, supplytypes, supplystatuses, row, setValueFeedback }: editModalProps) {
     const { register, watch, handleSubmit, reset, formState: { errors } } = useForm<editFormData>({
         defaultValues: {
             name: row?.name,
@@ -29,9 +29,19 @@ export default function EditSupplyModal({ open, handleClose, supplytypes, supply
         mutationFn: (data: editSupplyData) => editTableData(data),
         onSuccess: (result) => {
             if (result && result.success) {
-                handleClose();
+                setValueFeedback("feedbackMessage", `Insumo editado correctamente`);
+                setValueFeedback("feedbackSeverity", 'success');
+                setValueFeedback("feedbackOpen", true);
+                handleExit();
                 reset();
             };
+        },
+        onError: () => {
+            setValueFeedback("feedbackMessage", `Se ha encontrado un error, por favor, intentalo nuevamente`);
+            setValueFeedback("feedbackSeverity", 'error');
+            setValueFeedback("feedbackOpen", true);
+            handleExit();
+            reset();
         }
     });
     const onSubmit: SubmitHandler<editFormData> = (data) => {
@@ -81,7 +91,8 @@ export default function EditSupplyModal({ open, handleClose, supplytypes, supply
                 component: 'form',
                 onSubmit: handleSubmit(onSubmit),
                 onClick: handleDialogClick,
-                style: { width: '600px', maxWidth: 'none' }
+                elevation: 0,
+                    style: { width: '600px', maxWidth: 'none' }
             }} 
         >
             <div className='flex flex-col m-2'>

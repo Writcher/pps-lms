@@ -1,3 +1,4 @@
+import { UseFormSetValue } from "react-hook-form";
 import { fetchedHistoricScholar, newHistoricScholarQuery } from "./historicscholar";
 import { projectStatus } from "./projectstatus";
 import { projectType } from "./projecttype";
@@ -82,6 +83,7 @@ export type createModalProps = {
     historicprojecttypes: projectType[];
     historicprojectstatus: projectStatus[];
     laboratory_id: number;
+    setValueFeedback: UseFormSetValue<{ feedbackOpen: boolean, feedbackSeverity: 'success' | 'error', feedbackMessage: string }>
 };
 
 export type createFormData = {

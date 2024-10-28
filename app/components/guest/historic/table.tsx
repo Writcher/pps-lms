@@ -324,11 +324,12 @@ export default function HistoricTable({ historicusercareers, historicscholarship
         <main className="flex flex-col gap-2 w-full h-full">
             <div className="flex flex-col md:flex-row justify-center text-gray-700">
                 <div className="flex flex-row gap-2 h-14">
-                    <ButtonGroup variant="outlined" color="inherit">
+                    <ButtonGroup variant="outlined" color="inherit" className="w-full">
                         <Button 
                             variant="outlined" 
                             color="inherit"
-                            disableElevation 
+                            disableElevation
+                            className="!w-full md:!w-auto"
                             endIcon={<FilterAltIcon />}
                             onClick={handleFilterClick} 
                         >
@@ -338,6 +339,7 @@ export default function HistoricTable({ historicusercareers, historicscholarship
                             variant="outlined" 
                             color="error"
                             disableElevation 
+                            className="!w-full md:!w-auto"
                             onClick={handleClearFilters}
                         >
                             <FilterAltOffIcon/>
@@ -572,7 +574,7 @@ export default function HistoricTable({ historicusercareers, historicscholarship
                                         <React.Fragment key={row.id}>
                                             <TableRow 
                                                 onClick={() => toggleRowExpansion(row.id)}
-                                                className={`cursor-pointer ${expandedRowId === row.id ? 'bg-gradient-to-r from-transparent to-transparent via-gray-200' : ''}`}
+                                                className={`cursor-pointer ${expandedRowId === row.id ? 'bg-gradient-to-r from-transparent to-transparent via-gray-100' : ''}`}
                                             >
                                                 <TableCell align="left" size="small">
                                                     <div className="text-gray-700 font-medium text-[15px] md:text-lg">
@@ -596,7 +598,7 @@ export default function HistoricTable({ historicusercareers, historicscholarship
                                                 </TableCell>
                                             </TableRow>
                                             {expandedRowId === row.id && (
-                                                <TableRow className="bg-gradient-to-r from-transparent to-transparent via-gray-200">
+                                                <TableRow className="bg-gradient-to-r from-transparent to-transparent via-gray-100">
                                                     <TableCell colSpan={4}>
                                                         <div className="flex flex-col w-full">
                                                             <div className="flex gap-1 text-gray-700 font-medium md:text-[17px]">
@@ -676,6 +678,8 @@ export default function HistoricTable({ historicusercareers, historicscholarship
                     page={page}
                     onPageChange={handleChangePage}
                     onRowsPerPageChange={handleChangeRowsPerPage}
+                    labelRowsPerPage="Filas por página"
+                    labelDisplayedRows={({ from, to, count }) => `${from}-${to} de ${count !== -1 ? count : `más de ${to}`}`}
                 />
             </div>
         </main>

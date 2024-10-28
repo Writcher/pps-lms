@@ -1,6 +1,5 @@
 "use client"
 
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
@@ -8,20 +7,28 @@ import { userCareer } from "@/app/lib/dtos/usercareer";
 import { scholarshipType } from "@/app/lib/dtos/scholarshiptype";
 import ABMScholarTable from "./scholar/table";
 import ABMGuestTable from "./guest/table";
+import FeedbackSnackbar from "../../feedback";
 
-interface QueryClientProps {
+interface UserTabsProps {
   laboratory_id: number;
   usercareers: userCareer[];
   scholarships: scholarshipType[];
 };
 
-export default function ScholarQuery({ laboratory_id, usercareers, scholarships }: QueryClientProps) {
-  const queryClient = new QueryClient();
+export default function UserTabs({ laboratory_id, usercareers, scholarships }: UserTabsProps) {
   const { watch, setValue } = useForm({
     defaultValues: {
       tabValue: "",
     }
   });
+  const { watch: watchFeedback, setValue: setValueFeedback } = useForm({
+    defaultValues: {
+      feedbackOpen: false,
+      feedbackSeverity: "error" as "success" | "error",
+      feedbackMessage: "",
+    }
+  });
+  //tabs
   const selectedTab = watch("tabValue");
   const handleTabChange = (event: any, newValue: string) => {
     setValue("tabValue", newValue);
@@ -45,15 +52,24 @@ export default function ScholarQuery({ laboratory_id, usercareers, scholarships 
             usercareers={usercareers}
             scholarships={scholarships}
             laboratory_id={laboratory_id}
+            setValueFeedback={setValueFeedback}
           />
         );
       case "invitado":
         return (
           <ABMGuestTable
             laboratory_id={laboratory_id}
+            setValueFeedback={setValueFeedback}
           />
         );
     };
+  };
+  //feedback
+  const feedbackOpen = watchFeedback("feedbackOpen");
+  const feedbackSeverity = watchFeedback("feedbackSeverity");
+  const feedbackMessage = watchFeedback("feedbackMessage");
+  const handleFeedbackClose = () => {
+    setValueFeedback("feedbackOpen", false);
   };
   return (
     <main className="flex flex-col w-full h-full">
@@ -77,10 +93,14 @@ export default function ScholarQuery({ laboratory_id, usercareers, scholarships 
         </Tabs>
       </div>
       <div className="flex flex-col w-full px-4 py-4 md:px-6 md:py-6 h-[90%]">
-        <QueryClientProvider client={queryClient}>
-          {renderContent()}
-        </QueryClientProvider>
+        {renderContent()}
       </div>
+      <FeedbackSnackbar 
+        open={feedbackOpen}
+        onClose={handleFeedbackClose}
+        severity={feedbackSeverity}
+        message={feedbackMessage}
+      />
     </main>
   );
 };

@@ -48,6 +48,25 @@ export async function getLabScholars(labid: number) {
     };
 };
 
+export async function hasProject(id: number) {
+    try {
+        const text = `
+        SELECT * 
+        FROM "projectscholar"
+        WHERE scholar_id = $1
+        `;
+        const values = [id];
+        const result = await client.query(text, values);
+        if (result.rows.length > 0) {
+            return true;
+        };
+        return false;
+    } catch (error) {
+        console.error("Error de Base de Datos:", error);
+        throw new Error("No se pudo obtener la asignación");
+    };
+};
+
 export async function getAddScholars(labid: number, scholar_ids: number[]) {
     try {
         const type = await getTypeScholar();

@@ -16,7 +16,7 @@ import { Skeleton } from "@mui/material";
 import Gray800Tooltip from "../../../../utils";
 import CreateObservationModal from "./createtaskobservationmodal";
 
-export default function TaskObservationTable({ project_id, task_id, current_id }: taskObservationTableProps) {
+export default function TaskObservationTable({ project_id, task_id, current_id, setValueFeedback }: taskObservationTableProps) {
     const { watch, setValue, getValues, reset } = useForm<taskObservationFormData>({
         defaultValues: {
             observations: [],
@@ -31,11 +31,18 @@ export default function TaskObservationTable({ project_id, task_id, current_id }
     const loadMoreDisabled = watch("loadMoreDisabled");
     const observations = watch("observations");
     const page = watch("page");
-    const { data, isLoading, refetch } = useQuery({
+    const { data, isLoading, refetch, isError } = useQuery({
         queryKey: ['fetchTaskObservations', project_id, page],
         queryFn: () => fetchTaskObservations(project_id, task_id, page),
         refetchOnWindowFocus: false,
     });
+    useEffect(() => {
+        if (isError) {
+            setValueFeedback("feedbackMessage", `Se ha encontrado un error recuperando observaciones, por favor, recarga la página`);
+            setValueFeedback("feedbackSeverity", 'error');
+            setValueFeedback("feedbackOpen", true);
+        };
+    }, [isError])
     useEffect(() => {
         if (data) {
             const existingObservations = getValues("observations") || [];
@@ -70,7 +77,15 @@ export default function TaskObservationTable({ project_id, task_id, current_id }
                 const existingObservations = getValues("observations");
                 const updatedObservations = existingObservations.filter(observation => observation.id !== variables.id);
                 setValue("observations", updatedObservations);
+                setValueFeedback("feedbackMessage", `Observación eliminada correctamente`);
+                setValueFeedback("feedbackSeverity", 'success');
+                setValueFeedback("feedbackOpen", true);
             };
+        },
+        onError: () => {
+            setValueFeedback("feedbackMessage", `Se ha encontrado un error, por favor, intentalo nuevamente`);
+            setValueFeedback("feedbackSeverity", 'error');
+            setValueFeedback("feedbackOpen", true);
         }
     });
     const handleDelete = (id: number) => {
@@ -86,22 +101,21 @@ export default function TaskObservationTable({ project_id, task_id, current_id }
                 </div>
                 <div className="flex grow" />
                 <div className="flex mr-2">
-                    <Button variant="contained" color="success" disableElevation endIcon={<AddIcon />} onClick={handleOpenCreateModal}>AÑADIR</Button>
+                    <Button variant="contained" color="success" disableElevation endIcon={<AddIcon />} onClick={handleOpenCreateModal} disabled={isLoading || isError}>AÑADIR</Button>
                 </div>
             </div>
             <div className="flex flex-grow overflow-y-auto custom-scrollbar">
-                {isLoading ?
+                {isLoading || isError ?
                     (
                         <div className="flex flex-col gap-2 w-full h-full mr-2">
-                            <Skeleton variant="rectangular" width="100%" height="50%" className="rounded" />
-                            <Skeleton variant="rectangular" width="100%" height="50%" className="rounded" />
+                            <Skeleton variant="rectangular" width="100%" height="100%" className="rounded" />
                         </div>
                     ) : (
                         <Masonry columns={1} spacing={1}>
                             {observations && observations.length > 0 ? (
                                 observations.map((row: any) => (
                                     <React.Fragment key={row.id}>
-                                        <Card className="bg-gray-100 shadow-none border border-gray-400">
+                                        <Card className="shadow-none border border-gray-400">
                                             <CardContent>
                                                 <div className="flex flex-col gap-1">
                                                     <div className="flex flex-row items-center justify-center gap-1">
@@ -140,7 +154,7 @@ export default function TaskObservationTable({ project_id, task_id, current_id }
                 <div className="flex text-gray-800 mr-2">
                     <Gray800Tooltip title={loadMoreDisabled ? "No hay más observaciones!" : ""} arrow>
                         <span>
-                            <Button variant="outlined" color="inherit" disableElevation endIcon={<AddIcon />} onClick={handleLoadMore} disabled={loadMoreDisabled}>CARGAR MÁS OBSERVACIONES</Button>
+                            <Button variant="outlined" color="inherit" disableElevation endIcon={<AddIcon />} onClick={handleLoadMore} disabled={loadMoreDisabled || isLoading || isError}>CARGAR MÁS OBSERVACIONES</Button>
                         </span>
                     </Gray800Tooltip>
                 </div>
@@ -151,6 +165,7 @@ export default function TaskObservationTable({ project_id, task_id, current_id }
                 project_id={project_id}
                 task_id={task_id}
                 current_id={current_id}
+                setValueFeedback={setValueFeedback}
             />
         </div>
     );

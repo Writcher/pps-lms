@@ -28,7 +28,7 @@ interface APIError {
     email?:string,
 };
 
-export default function CreateGuestModal({ open, handleClose, laboratory_id }: createModalProps) {
+export default function CreateGuestModal({ open, handleClose, laboratory_id, setValueFeedback }: createModalProps) {
     const { watch, register, handleSubmit, reset, formState: { errors }, setValue, setError, clearErrors } = useForm<createFormData>({
         defaultValues: {
             name: '',
@@ -42,7 +42,10 @@ export default function CreateGuestModal({ open, handleClose, laboratory_id }: c
         mutationFn: (data: createGuestData) => createTableData(data),
         onSuccess: (result) => {
             if (result && result.success) {
-                handleClose();
+                setValueFeedback("feedbackMessage", `Invitado creado correctamente`);
+                setValueFeedback("feedbackSeverity", 'success');
+                setValueFeedback("feedbackOpen", true);
+                handleExit();
                 reset();
             } else if (result) {
                 if (result.apiError) {
@@ -50,9 +53,13 @@ export default function CreateGuestModal({ open, handleClose, laboratory_id }: c
                 };
             };
         },
-        onError: (error: APIError) => {
-            setApiError({ email: error.email });
-        },
+        onError: () => {
+            setValueFeedback("feedbackMessage", `Se ha encontrado un error, por favor, intentalo nuevamente`);
+            setValueFeedback("feedbackSeverity", 'error');
+            setValueFeedback("feedbackOpen", true);
+            handleExit();
+            reset();
+        }
     });
     const onSubmit: SubmitHandler<createFormData> = (data) => {
         mutation.mutate({ 
@@ -88,7 +95,8 @@ export default function CreateGuestModal({ open, handleClose, laboratory_id }: c
                 component: 'form',
                 onSubmit: handleSubmit(onSubmit),
                 onClick: handleDialogClick,
-                style: { width: '600px', maxWidth: 'none' }
+                elevation: 0,
+                    style: { width: '600px', maxWidth: 'none' }
             }} 
         >
             <div className='flex flex-col m-2'>

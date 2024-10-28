@@ -1,8 +1,10 @@
 import { Dayjs } from "dayjs";
 import { newUserQuery, userSchema } from "./user";
+import { UseFormSetValue } from "react-hook-form";
 
 export type guestTableProps = {
     laboratory_id: number;
+    setValueFeedback: UseFormSetValue<{ feedbackOpen: boolean, feedbackSeverity: 'success' | 'error', feedbackMessage: string }>
 };
 
 export type guestFormData = {
@@ -32,6 +34,7 @@ export type createModalProps = {
     open: boolean;
     handleClose: () => void;
     laboratory_id: number;
+    setValueFeedback: UseFormSetValue<{ feedbackOpen: boolean, feedbackSeverity: 'success' | 'error', feedbackMessage: string }>
 };
 
 export type createFormData = {
@@ -39,6 +42,7 @@ export type createFormData = {
     email: string;
     expires_at: Dayjs | null;
     password: string;
+    setValueFeedback: UseFormSetValue<{ feedbackOpen: boolean, feedbackSeverity: 'success' | 'error', feedbackMessage: string }>
 };
 
 export type createGuestData = {
@@ -86,4 +90,5 @@ export type deleteModalProps = {
     handleClose: () => void;
     id: number;
     name: string;
+    setValueFeedback: UseFormSetValue<{ feedbackOpen: boolean, feedbackSeverity: 'success' | 'error', feedbackMessage: string }>
 };

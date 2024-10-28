@@ -1,4 +1,4 @@
-import GuestProjectQuery from "@/app/components/guest/projects/projectQuery";
+import GuestProjectTable from "@/app/components/guest/projects/table";
 import { auth } from "@/app/lib/auth";
 import { getProjectStatuses } from "@/app/lib/queries/projectstatus";
 import { getProjectTypes } from "@/app/lib/queries/projecttype";
@@ -25,7 +25,7 @@ export default async function ProyectosInvitado() {
                 </p>
             </div>
             <div className="flex flex-col items-center justify-center h-[90%]">
-                <GuestProjectQuery
+                <GuestProjectTable
                     laboratory_id={laboratory_id}
                     usercareers={ussercareers}
                     scholarships={scholarships}

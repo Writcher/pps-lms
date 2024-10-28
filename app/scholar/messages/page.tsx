@@ -1,6 +1,6 @@
 import { auth } from "@/app/lib/auth";
 import { redirect } from "next/navigation";
-import ChatQuery from "@/app/components/scholar/messages/chatQuery";
+import ChatScholar from "@/app/components/scholar/messages/chat";
 
 export default async function MessagePageScholar() {
     const session = await auth();
@@ -10,7 +10,7 @@ export default async function MessagePageScholar() {
     const current_id = session?.user?.id;
     return (
         <main className="flex flex-col w-full h-full">
-            <ChatQuery laboratory_id={laboratory_id} current_id={current_id} usertype_id={usertype_id}/>
+            <ChatScholar laboratory_id={laboratory_id} current_id={current_id} usertype_id={usertype_id}/>
         </main>
     );
 };

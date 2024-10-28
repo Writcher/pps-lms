@@ -17,7 +17,8 @@ export type chatFormData = {
     tabValue: number;
     message: string | '';
     messages: fetchedMessages[];
-
+    page: number;
+    loadMoreDisabled: boolean;
 };
 
 export type fetchChatUsersData = {
@@ -45,9 +46,11 @@ export type readMessagesData = {
 export type fetchMessagesData = {
     sender_id: number;
     receiver_id: number;
+    page: number;
 };
 
 export type fetchedMessages = {
+    id: number;
     content: string;
     sender_id: number;
     receiver_id: number;
@@ -66,3 +69,9 @@ export type fetchedAdminMessages = {
     name: string;
     unreadCount: any;
 };
+
+export type deleteMessageData = {
+    id: number;
+};
+
+export type deleteMessageQuery = deleteMessageData;

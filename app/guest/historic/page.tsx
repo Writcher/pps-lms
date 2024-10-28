@@ -1,4 +1,4 @@
-import GuestHistoricQuery from "@/app/components/guest/historic/guesthistoricQuery";
+import HistoricTable from "@/app/components/guest/historic/table";
 import { auth } from "@/app/lib/auth";
 import { getHistoricProjectStatuses } from "@/app/lib/queries/historicprojectstatus";
 import { getHistoricProjectTypes } from "@/app/lib/queries/historicprojecttype";
@@ -24,7 +24,7 @@ export default async function HistoricoInvitados() {
                 </p>
             </div>
             <div className="flex flex-col items-center justify-center h-[90%]">
-                <GuestHistoricQuery
+                <HistoricTable
                     laboratory_id={laboratory_id}
                     historicusercareers={historicussercareers}
                     historicscholarships={historicscholarships}
