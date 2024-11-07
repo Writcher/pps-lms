@@ -59,6 +59,21 @@ export async function verifyUserEmail(email: string, status: number) {
     };
 };
 
+export async function changeUserPassword(params: { password: string, email: string }) {
+    try {
+        const text = `
+            UPDATE "user"
+            SET password = $1
+            WHERE email = $2
+        `;
+        const values = [params.password, params.email];
+        return client.query(text, values);
+    } catch(error) {
+        console.error("Error de Base de Datos:", error);
+        throw new Error("No se pudo editar el usuario");
+    };
+};
+
 export async function userChangeStatus(id: number, newStatus: number, ) {
     try {
         const date = new Date;

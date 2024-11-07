@@ -2,12 +2,12 @@ import sgMail from '@sendgrid/mail';
 
 sgMail.setApiKey(process.env.SENDGRID_API_KEY!);
 
-export default async function sendVerificationEmail(email: string, token: string) {
+export default async function sendRecoveryEmail(email: string, token: string) {
     try {
         const msg = {
             to: email,
             from: 'lmsemailverificacion@gmail.com',
-            subject: 'Verificación de Email - LMS',
+            subject: 'Recuperar Contraseña - LMS',
             html: `
                 <!DOCTYPE html>
                 <html lang="es">
@@ -84,7 +84,7 @@ export default async function sendVerificationEmail(email: string, token: string
                     <div class="main-container">
                         <!-- Header -->
                         <div class="header">
-                            <h1>Bienvenido a LMS</h1>
+                            <h1>LMS</h1>
                         </div>
                         
                         <!-- Top Divider -->
@@ -93,12 +93,12 @@ export default async function sendVerificationEmail(email: string, token: string
                         <!-- Main Content -->
                         <div class="content-container">
                             <p class="welcome-text">
-                                <strong class="highlight-text">¡Bienvenido a LMS!</strong>
-                                <br>Haz clic en el enlace a continuación para verificar tu cuenta.
+                                <strong class="highlight-text">¿Olvidaste tu contraseña?</strong>
+                                <br>Haz click a continuación para cambiar tu contraseña.
                             </p>
                             <div class="verify-link">
-                                <a href="${process.env.AUTH_URL}/api/auth/verifyemail?token=${token}">
-                                    Verificar Email
+                                <a href="${process.env.AUTH_URL}/recovery/${token}">
+                                    Recuperar contraseña
                                 </a>
                             </div>
                         </div>

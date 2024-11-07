@@ -87,7 +87,7 @@ export default function LoginForm({ admin, guest, scholar }: loginFormProps ) {
                     />
                 </div>
                 <div className="flex items-center justify-center mb-6">
-                    <strong className="text-sm text-gray-700">¿Olvidaste tu contraseña? <Link className="text-sm text-orange-500" href={"#"}>Cambiala</Link>.</strong>
+                    <strong className="text-sm text-gray-700">¿Olvidaste tu contraseña? <Link className="text-sm text-orange-500" href={"/recovery"}>Cambiala</Link>.</strong>
                 </div>
                 <Button 
                     variant="contained" 
