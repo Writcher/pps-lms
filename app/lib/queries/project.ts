@@ -469,6 +469,11 @@ export async function dropProject(params: deleteProjectData) {
         `;
         const values5 = [params.id];
         await client.query(text5, values5);
+        const text7 = `
+        DELETE FROM "projectgrade" WHERE project_id = $1
+        `;
+        const values7 = [params.id];
+        await client.query(text7, values7)
         const text6 = `
         DELETE FROM "project" WHERE id = $1
         `;
