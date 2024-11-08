@@ -15,6 +15,7 @@ import Masonry from "@mui/lab/Masonry";
 import { Skeleton } from "@mui/material";
 import Gray800Tooltip from "../../../../utils";
 import CreateObservationModal from "./createtaskobservationmodal";
+import convertToLinks from "@/app/components/converttohtml";
 
 export default function TaskObservationTable({ project_id, task_id, current_id, setValueFeedback }: taskObservationTableProps) {
     const { watch, setValue, getValues, reset } = useForm<taskObservationFormData>({
@@ -134,9 +135,10 @@ export default function TaskObservationTable({ project_id, task_id, current_id, 
                                                             <DeleteIcon />
                                                         </IconButton>
                                                     </div>
-                                                    <div className="flex-grow text-gray-700 font-medium text-[15px] break-words">
-                                                        {row.content}
-                                                    </div>
+                                                    <div
+                                                        className="flex-grow text-gray-700 font-medium text-[15px] break-words"
+                                                        dangerouslySetInnerHTML={{ __html: convertToLinks(row.content) }}
+                                                    />
                                                 </div>
                                             </CardContent>
                                         </Card>
