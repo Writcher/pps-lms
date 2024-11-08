@@ -29,7 +29,7 @@ export default function LoginForm({ admin, guest, scholar }: loginFormProps ) {
             if (result && result.success) {
                 switch (result.usertype_id) {
                     case scholar:
-                        router.push("/scholar/dashboard");
+                        router.push("/scholar/projects");
                         break;
                     case admin:
                         router.push("/admin/projects");

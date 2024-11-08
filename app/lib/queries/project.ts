@@ -1,5 +1,5 @@
 import { db } from "@vercel/postgres";
-import { deleteProjectData, editProjectQuery, fetchedPageProject, fetchedProjectForEdit, fetchedProjectScholars, fetchedTableProject, fetchTableProjectsData, fethedProjectGrade, newProjectQuery } from "../dtos/project";
+import { deleteProjectData, editProjectQuery, fetchedPageProject, fetchedProjectForEdit, fetchedProjectScholars, fetchedTableProject, fethedProjectGrade, getScholarTableProjectsQuery, getTableProjectsQuery, newProjectQuery } from "../dtos/project";
 import { addScholarQuery, removeScholarQuery } from "../dtos/scholar";
 import { gradeProjectQuery } from "../dtos/grade";
 
@@ -20,7 +20,7 @@ export async function getProjectName(id: number) {
     };
 };
 
-export async function getTableProjects(params: fetchTableProjectsData) {
+export async function getTableProjects(params: getTableProjectsQuery) {
     try {
         const offset = (params.page) * params.rowsPerPage;
         const projectsearch = `%${params.projectSearch}%`;
@@ -120,6 +120,98 @@ export async function getTableProjects(params: fetchTableProjectsData) {
             projects: result.rows as fetchedTableProject[],
             totalProjects: countresult.rows[0].total,
         };
+    } catch (error) {
+        console.error("Error de Base de Datos:", error);
+        throw new Error("No se pudo obtener los proyectos");
+    };
+};
+
+export async function getScholarTableProjects(params: getScholarTableProjectsQuery) {
+    try {
+        const offset = (params.page) * params.rowsPerPage;
+        const projectsearch = `%${params.projectSearch}%`;
+        const baseValues = [params.laboratory_id, params.rowsPerPage, offset, params.current_id];
+        let text = `
+            SELECT 
+                p.id, 
+                p.name, 
+                p.description,   
+                pt.name AS projecttypename,
+                ps.name AS projectstatusname,
+                (SELECT COUNT(*) 
+                    FROM "task" t 
+                    WHERE t.project_id = p.id ) AS projecttaskcount,
+                (SELECT COUNT(*)
+                    FROM "task" t
+                    JOIN "taskstatus" ts ON t.taskstatus_id = ts.id
+                    WHERE t.project_id = p.id AND ts.name = 'Completada') AS completedprojecttaskcount,
+                (SELECT COUNT(*)
+                    FROM "observation_read" r
+                    JOIN "observation" o ON r.observation_id = o.id
+                    WHERE r.scholar_id = $4 AND is_read = false AND o.project_id = p.id) AS newobservations
+            FROM "project" p
+            JOIN "projecttype" pt ON p.projecttype_id = pt.id
+            JOIN "projectstatus" ps ON p.projectstatus_id = ps.id
+            LEFT JOIN "projectscholar" psc ON p.id = psc.project_id
+            WHERE p.laboratory_id = $1
+            AND psc.scholar_id = $4
+        `;
+        const values: any = [...baseValues];
+        let filtertext = '';
+        if (params.projectSearch !== "") {
+            filtertext += `AND unaccent(p.name) ILIKE unaccent($${values.length + 1}) 
+            `;
+            values.push(projectsearch);
+        };
+        if (params.projecttype_id !== 0) {
+            filtertext += `AND p.projecttype_id = $${values.length + 1}
+            `;
+            values.push(params.projecttype_id);
+        };
+        if (params.projectstatus_id !== 0) {
+            filtertext += `AND p.projectstatus_id = $${values.length + 1}
+            `;
+            values.push(params.projectstatus_id);
+        };
+        text += filtertext;
+        const grouptext = `
+            GROUP BY 
+                p.id, pt.name, ps.name
+        `;
+        text += grouptext;
+        text += `
+            LIMIT $2 OFFSET $3
+        `;
+        const result = await client.query(text, values);
+        const text2 = `
+        SELECT COUNT(*) AS total
+        FROM "project" p
+        LEFT JOIN "projectscholar" psc ON p.id = psc.project_id
+        WHERE p.laboratory_id = $1 AND psc.scholar_id = $2
+        `;
+        const values2 = [params.laboratory_id, params.current_id];
+        const countresult = await client.query(text2, values2);
+        return {
+            projects: result.rows as fetchedTableProject[],
+            totalProjects: countresult.rows[0].total,
+        };
+    } catch (error) {
+        console.error("Error de Base de Datos:", error);
+        throw new Error("No se pudo obtener los proyectos");
+    };
+};
+
+export async function countAllUnreadObservations(id: number) {
+    try {
+        const text = `
+        SELECT COUNT(*)
+        FROM "observation_read" r
+        JOIN "observation" o ON r.observation_id = o.id
+        WHERE r.scholar_id = $1 AND is_read = false
+        `;
+        const values = [id];
+        const count = await client.query(text, values);
+        return parseInt(count.rows[0].count, 10);
     } catch (error) {
         console.error("Error de Base de Datos:", error);
         throw new Error("No se pudo obtener los proyectos");

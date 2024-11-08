@@ -3,18 +3,48 @@
 import { fetchedABMItem } from "@/app/lib/dtos/abm";
 import { gradeProjectData } from "@/app/lib/dtos/grade";
 import { createProjectObservationData, createTaskObservationData, deleteObservationData } from "@/app/lib/dtos/observation";
-import { deleteProjectData, editProjectData, fetchedTableProject, fetchTableProjectsData, getTableProjectsQuery, newProjectData } from "@/app/lib/dtos/project";
+import { deleteProjectData, editProjectData, fetchedTableProject, fetchScholarTableProjectsData, fetchTableProjectsData, getScholarTableProjectsQuery, getTableProjectsQuery, newProjectData } from "@/app/lib/dtos/project";
 import { addScholarData, removeScholarData } from "@/app/lib/dtos/scholar";
 import { createProjectTaskData, deleteTaskData, dragTaskData, editTaskData } from "@/app/lib/dtos/task";
 import { getGrades } from "@/app/lib/queries/grade";
 import { recordHistoricProject } from "@/app/lib/queries/historicproject";
-import { newProjectObservation, newTaskObservation, dropObservation, getProjectObservations, getTaskObservations } from "@/app/lib/queries/observations";
-import { addScholar, newProject, updateProject, getProjectById, getTableProjects, removeScholar, dropProject, getProjectForEditById, getProjectScholarsByProjectId, getProjectGrades, createProjectGrade } from "@/app/lib/queries/project";
+import { newProjectObservation, newTaskObservation, dropObservation, getProjectObservations, getTaskObservations, getScholarProjectObservations, readAllScholarObservationsProject, getScholarTaskObservations, readAllScholarObservationsTask } from "@/app/lib/queries/observations";
+import { addScholar, newProject, updateProject, getProjectById, getTableProjects, removeScholar, dropProject, getProjectForEditById, getProjectScholarsByProjectId, getProjectGrades, createProjectGrade, getScholarTableProjects, countAllUnreadObservations } from "@/app/lib/queries/project";
 import { getProjectStatuses } from "@/app/lib/queries/projectstatus";
 import { getProjectTypes } from "@/app/lib/queries/projecttype";
 import { getAddScholars, getLabScholars } from "@/app/lib/queries/scholar";
-import { newProjectTask, dropTask, dragTask, editTask, getCalendarTasks, getProjectTasks, getTaskById } from "@/app/lib/queries/task";
+import { newProjectTask, dropTask, dragTask, editTask, getCalendarTasks, getProjectTasks, getTaskById, getScholarProjectTasks, getScholarCalendarTasks } from "@/app/lib/queries/task";
 import { getTaskStatuses } from "@/app/lib/queries/taskstatus";
+
+export async function fetchUnreadObservationCount(id: number) {
+    try {
+        let response: number;
+        response = await countAllUnreadObservations(id);
+        return response;
+    } catch (error) {
+        console.error("Error en fetchUnreadObservationCount:", error);
+    }
+};
+
+export async function fetchScholarTableData(data: fetchScholarTableProjectsData) {
+    try {
+        const params = {
+            projectSearch: data.projectSearch,
+            projectstatus_id: data.projectstatus_id,
+            projecttype_id: data.projecttype_id,
+            laboratory_id: data.laboratory_id,
+            page: data.page,
+            rowsPerPage: data.rowsPerPage,
+            current_id: data.current_id,
+        } as getScholarTableProjectsQuery;
+        let response: { projects: fetchedTableProject[]; totalProjects: any }; 
+        response = await getScholarTableProjects(params);
+        return response;
+    } catch (error) {
+        console.error("Error en fetchScholarTableData(Projects):", error);
+        throw error;
+    };
+};
 
 export async function fetchTableData(data: fetchTableProjectsData) {
     try {
@@ -186,6 +216,36 @@ export async function fetchProjectObservations(id: number, page: number)  {
     };
 };
 
+export async function fetchScholarProjectObservations(id: number, page: number, current_id: number)  {
+    try {
+        const response = await getScholarProjectObservations(id, page, current_id);
+        return response;
+    } catch (error) {
+        console.error("Error en fetchLabScholars:", error);
+        throw error;
+    };
+};
+
+export async function readAllObservations(scholar_id: number, project_id: number) {
+    try {
+        await readAllScholarObservationsProject(scholar_id, project_id);
+        return { success: true };
+    } catch (error) {
+        console.error("Error en fetchLabScholars:", error);
+        throw error;
+    };
+};
+
+export async function readAllTaskObservations(scholar_id: number, project_id: number, task_id: number) {
+    try {
+        await readAllScholarObservationsTask(scholar_id, project_id, task_id);
+        return { success: true };
+    } catch (error) {
+        console.error("Error en fetchLabScholars:", error);
+        throw error;
+    };
+};
+
 export async function createProjectObservation(data: createProjectObservationData) {
     try {
         try {
@@ -219,6 +279,16 @@ export async function deleteObservation(data: deleteObservationData) {
 export async function fetchProjectTasks(id: number, page: number) {
     try {
         const response = await getProjectTasks(id, page);
+        return response;
+    } catch (error) {
+        console.error("Error en fetchProjectTasks:", error);
+        throw error;
+    };
+};
+
+export async function fetchScholarProjectTasks(id: number, page: number, scholar_id: number) {
+    try {
+        const response = await getScholarProjectTasks(id, page, scholar_id);
         return response;
     } catch (error) {
         console.error("Error en fetchProjectTasks:", error);
@@ -281,6 +351,16 @@ export async function fetchCalendarTasks(id: number, start_date: Date, end_date:
     };
 };
 
+export async function fetchScholarCalendarTasks(id: number, start_date: Date, end_date: Date, current_id: number) {
+    try {
+        const response = await getScholarCalendarTasks(id, start_date, end_date, current_id);
+        return response;
+    } catch (error) {
+        console.error("Error en fetchScholarCalendarTasks:", error);
+        throw error;
+    };
+};
+
 export async function editCalendarTask(data: dragTaskData) {
     try {
         try {
@@ -333,6 +413,16 @@ export async function fetchTaskById(id: number, project_id: number) {
 export async function fetchTaskObservations(project_id: number, task_id: number, page: number)  {
     try {
         const response = await getTaskObservations(project_id, task_id, page);
+        return response;
+    } catch (error) {
+        console.error("Error en fetchTaskObservations:", error);
+        throw error;
+    };
+};
+
+export async function fetchScholarTaskObservations(project_id: number, task_id: number, page: number, current_id: number)  {
+    try {
+        const response = await getScholarTaskObservations(project_id, task_id, page, current_id);
         return response;
     } catch (error) {
         console.error("Error en fetchTaskObservations:", error);
