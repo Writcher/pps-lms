@@ -149,7 +149,7 @@ export async function dropGuest(id: number) {
         WHERE id = $1
         `;
         const values2 = [id];
-        await client.query(text, values);
+        await client.query(text2, values2);
         const committext = `COMMIT`;
         await client.query(committext);
         return { success: true, message: "Instancia eliminada correctamente" };

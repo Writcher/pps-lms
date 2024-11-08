@@ -80,8 +80,8 @@ export default function RegisterForm() {
                                     value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
                                     message: "Ingrese un email válido"
                                 },
-                                /* validate: (value) =>
-                                    value.endsWith("@docentes.frm.utn.edu.ar") || "Debe usar su correo institucional (@docentes.frm.utn.edu.ar)" */
+                                validate: (value) =>
+                                    value.endsWith("@docentes.frm.utn.edu.ar") || "Debe usar su correo institucional (@docentes.frm.utn.edu.ar)"
                             })}
                             error={!!errors.email || !!apiError.email}
                             helperText={errors.email ? errors.email.message : apiError.email ? apiError.email : "Ingrese Email"}

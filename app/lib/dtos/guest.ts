@@ -55,6 +55,7 @@ export type createGuestData = {
 
 export type newGuestQuery = newUserQuery & {
     expires_at: Date;
+    laboratory_id: number;
 };
 
 export type fetchedGuest = {
