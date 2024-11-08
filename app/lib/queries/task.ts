@@ -65,6 +65,48 @@ export async function getProjectTasks(project_id: number, page: number) {
     };
 };
 
+export async function getScholarProjectTasks(project_id: number, page: number, scholar_id: number) {
+    try {
+        const limit = 5;
+        const offset = (page - 1) * limit;
+        const text1 = `
+        SELECT
+            t.id,
+            t.name,
+            t.description,
+            t.created_at,
+            t.start_date AS "start",
+            t.end_date AS "end",
+            ts.name AS taskstatusname,
+            (SELECT COUNT(*)
+                FROM "observation_read" r
+                JOIN "observation" o ON r.observation_id = o.id
+                WHERE r.scholar_id = $4 AND is_read = false AND o.task_id = t.id) AS newobservations
+        FROM "task" t
+        JOIN "taskstatus" ts ON t.taskstatus_id = ts.id
+        WHERE t.project_id = $1
+        ORDER BY created_at DESC
+        LIMIT $2 OFFSET $3
+        `;
+        const values1 = [project_id, limit, offset, scholar_id];
+        const result = await client.query(text1, values1);
+        const text2 = `
+        SELECT COUNT(*) AS total
+        FROM "task"
+        WHERE project_id = $1
+        `;
+        const values2 = [project_id];
+        const count = await client.query(text2, values2);
+        return {
+            tasks: result.rows as fetchedPageTask[],
+            totalTasks: count.rows[0].total as number,
+        };
+    } catch (error) {
+        console.error("Error de Base de Datos:", error);
+        throw new Error("No se pudo obtener la tarea");
+    };
+};
+
 export async function getTaskName(id: number) {
     try {
         const text = `
@@ -99,6 +141,37 @@ export async function getCalendarTasks(id: number, start_date: Date, end_date: D
             AND t.start_date BETWEEN $2 AND $3
         `;
         const values = [id, formatedstart, formatedend];
+        const result = await client.query(text, values);
+        return result.rows as calendarTasks[];
+    } catch (error) {
+        console.error("Error de Base de Datos:", error);
+        throw new Error("No se pudo obtener la tarea");
+    };
+};
+
+export async function getScholarCalendarTasks(id: number, start_date: Date, end_date: Date, current_id: number) {
+    try {
+        const formatedstart = new Date(start_date).toISOString().split('T')[0];
+        const formatedend = new Date(end_date).toISOString().split('T')[0];
+        const text = `
+        SELECT
+            t.id,
+            t.name AS title,
+            t.start_date AS "start",
+            t.end_date AS "end",
+            t.description,
+            ts.name AS taskstatusname,
+            t.created_at,
+            (SELECT COUNT(*)
+                FROM "observation_read" r
+                JOIN "observation" o ON r.observation_id = o.id
+                WHERE r.scholar_id = $4 AND is_read = false AND o.task_id = t.id) AS newobservations
+        FROM "task" t
+        JOIN "taskstatus" ts ON t.taskstatus_id = ts.id
+        WHERE t.project_id = $1
+            AND t.start_date BETWEEN $2 AND $3
+        `;
+        const values = [id, formatedstart, formatedend, current_id];
         const result = await client.query(text, values);
         return result.rows as calendarTasks[];
     } catch (error) {

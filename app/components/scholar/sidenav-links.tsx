@@ -1,21 +1,20 @@
 'use client'
 
-import { usePathname } from 'next/navigation';//Para ressaltar el link activo.
-import clsx from 'clsx';//Para aplicar estilos condicionalmente. Los dos se usan para resaltar el link activo
+import { usePathname } from 'next/navigation'; // Para resaltar el link activo.
+import clsx from 'clsx'; // Para aplicar estilos condicionalmente.
 import Link from 'next/link';
-import HomeIcon from '@mui/icons-material/Home';
+import WorkIcon from '@mui/icons-material/Work';
 import ChatIcon from '@mui/icons-material/Chat';
 import Badge from '@mui/material/Badge';
 import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { useQuery } from '@tanstack/react-query';
 import { fetchUnreadCount } from '@/app/services/messages/chat.service';
+import { fetchUnreadObservationCount } from '@/app/services/projects/projects.service';
 
 const linksscholar = [
-  { name: 'Inicio', href: '/scholar/dashboard', icon: HomeIcon },
+  { name: 'Proyectos', href: '/scholar/projects', icon: WorkIcon },
   { name: 'Mensajes', href: '/scholar/messages', icon: ChatIcon },
-  
-  //Añadir links segun necesario aca.
 ];
 
 interface LinkProps {
@@ -26,33 +25,51 @@ export function SideNavLinksScholar({ current_id_number }: LinkProps) {
   const { watch, setValue } = useForm({
     defaultValues: {
       unreadCount: 0,
-    }
+      unreadobservations: 0,
+    },
   });
-  //fetch unread count
-  const { data, refetch } = useQuery({
+
+  // Fetch unread counts
+  const { data: unreadMessages, refetch } = useQuery({
     queryKey: ['getUnreadCount'],
     queryFn: () => fetchUnreadCount(current_id_number),
     refetchInterval: 5000,
   });
+  const { data: unreadObservations, refetch: refetchObservations } = useQuery({
+    queryKey: ['getUnreadObservationCount'],
+    queryFn: () => fetchUnreadObservationCount(current_id_number),
+    refetchInterval: 5000,
+  });
+
   useEffect(() => {
-    if (data !== undefined && data !== null) {
-      setValue("unreadCount", data, { shouldValidate: true });
+    if (unreadMessages !== undefined) {
+      setValue("unreadCount", unreadMessages, { shouldValidate: true });
     }
-  }, [data, setValue]);
+    if (unreadObservations !== undefined) {
+      setValue("unreadobservations", unreadObservations, { shouldValidate: true });
+    }
+  }, [unreadMessages, unreadObservations, setValue]);
+
   const unreadCount = watch('unreadCount');
-  //pathname
+  const unreadObservationsCount = watch('unreadobservations');
+
+  // Pathname to highlight the active link
   const pathname = usePathname();
-  //link click
+
+  // Handle link click to refetch counts
   const handleLinkClick = () => {
     refetch();
+    refetchObservations();
   };
+
   return (
     <>
       {linksscholar.map((link) => {
         const LinkIcon = link.icon;
-        const isActive = pathname === link.href || pathname.startsWith(`${link.href}/`); // Verifica si el pathname es igual o comienza con el href seguido de una barra
+        const isActive = pathname === link.href || pathname.startsWith(`${link.href}/`);
 
-        const renderBadge = link.name === 'Mensajes' && unreadCount > 0;
+        const renderMessageBadge = link.name === 'Mensajes' && unreadCount > 0;
+        const renderObservationBadge = link.name === 'Proyectos' && unreadObservationsCount > 0;
 
         return (
           <Link
@@ -67,9 +84,9 @@ export function SideNavLinksScholar({ current_id_number }: LinkProps) {
             )}
           >
             <Badge
-              badgeContent={unreadCount}
+              badgeContent={link.name === 'Mensajes' ? unreadCount : unreadObservationsCount}
               color="error"
-              invisible={!renderBadge}
+              invisible={!(renderMessageBadge || renderObservationBadge)}
               overlap="circular"
             >
               <LinkIcon className="w-6" />

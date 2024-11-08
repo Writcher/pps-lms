@@ -30,7 +30,6 @@ export type newUserQuery = {
     name: string;
     email: string;
     password: string;
-    laboratory_id: number;
     usertype_id: number;
     userstatus_id: number;
 };
@@ -40,20 +39,30 @@ export type registerFormProps = {
 };
 
 export type registerFormData = {
-    laboratory_id: number | '';
     name: string;
     email: string;
     password: string;
     confirmPassword: string;
+};
+
+export type labFormData = {
+    laboratory_id: number | '';
     modalOpenCreate: boolean;
 };
 
 export type createAdminData = {
-    laboratory_id: number;
     name: string;
     email: string;
     password: string;
 }; 
+
+export type addLabData = {
+    laboratory_id: number;
+    user_id: number;
+};
+
+
+export type addLabQuery = addLabData;
 
 export type loginFormProps = {
     admin: number;

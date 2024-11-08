@@ -33,6 +33,12 @@ export type projectTaskTableProps = {
     setValueFeedback: UseFormSetValue<{ feedbackOpen: boolean, feedbackSeverity: 'success' | 'error', feedbackMessage: string }>
 };
 
+export type scholarProjectTaskTableProps = {
+    id: number;
+    current_id: number;
+    setValueFeedback: UseFormSetValue<{ feedbackOpen: boolean, feedbackSeverity: 'success' | 'error', feedbackMessage: string }>
+};
+
 export type projectTaskFormData = {
     tasks: fetchedPageTask[];
     loadMoreDisabled: boolean;
@@ -85,6 +91,7 @@ export type calendarTasks = {
     created_at: Date;
     start: string;
     end: string;
+    newobservations?: number;
 };
 
 export type projectTaskCalendarFormData = {

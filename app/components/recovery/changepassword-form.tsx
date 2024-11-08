@@ -1,92 +1,56 @@
 "use client"
 
 import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
-import { useState } from "react";
 import { useRouter } from "next/navigation";
 import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
-import MenuItem from '@mui/material/MenuItem';
 import React from 'react';
 import { SubmitHandler, useForm } from 'react-hook-form';
-import { useMutation, useQuery } from '@tanstack/react-query';
-import { createAdminData, registerFormData } from '@/app/lib/dtos/user';
-import { createAdmin, fetchLaboratories } from '@/app/services/register/register.service';
-import { laboratory } from '@/app/lib/dtos/laboratory';
-import { CircularProgress, IconButton } from '@mui/material';
-import AddIcon from '@mui/icons-material/Add';
-import CreateLaboratoryModal from './lab/createmodal';
+import { useMutation } from '@tanstack/react-query';
+import { CircularProgress } from '@mui/material';
+import FeedbackSnackbar from '../feedback';
+import { changePassword } from '@/app/services/recovery/recovery.service';
 
-interface APIErrors {
-    email?: string,
-    name?: string,
-};
-
-export default function RegisterForm() {
-    const { watch, register, handleSubmit, getValues, formState: { errors }, setValue } = useForm<registerFormData>({
+export default function ChangePasswordForm({ token }: { token: string }) {
+    const { reset, register, handleSubmit, getValues, formState: { errors }, setValue } = useForm<{ password: string, confirmPassword: string }>({
+    });
+    const { watch: watchFeedback, setValue: setValueFeedback } = useForm({
+        defaultValues: {
+            feedbackOpen: false,
+            feedbackSeverity: "error" as "success" | "error",
+            feedbackMessage: "",
+        }
     });
     const router = useRouter();
-    const [apiError, setApiError] = useState<APIErrors>({});
-    //create user
+    //change passwword
     const registerUser = useMutation({
-        mutationFn: (data: createAdminData) => createAdmin(data),
-        onSuccess:  (result) => {
-            if (result && result.success) {
-                router.push(`/register/lab?userid=${result.user_id}`);
-            } else if (result) {
-                if (result.apiError) {
-                    setApiError(result.apiError);
-                };
-            };
+        mutationFn: (data: { password: string, token: string }) => changePassword(data),
+        onSuccess:  () => {
+            router.push("/login?recovery=true");
         },
-        onError: () => {
+        onError: (error) => {
+            setValueFeedback("feedbackMessage", `Se ha encontrado un error, por favor, intentalo nuevamente`);
+            setValueFeedback("feedbackSeverity", 'error');
+            setValueFeedback("feedbackOpen", true);
+            reset();
         },
     });
-    const onSubmit: SubmitHandler<registerFormData> = (data) => {
+    const onSubmit: SubmitHandler<{ password: string, confirmPassword: string }> = (data) => {
         registerUser.mutate({
-            name: data.name,
             password: data.password,
-            email: data.email,
+            token: token,
         });
+    };
+    const feedbackOpen = watchFeedback("feedbackOpen");
+    const feedbackSeverity = watchFeedback("feedbackSeverity");
+    const feedbackMessage = watchFeedback("feedbackMessage");
+    const handleFeedbackClose = () => {
+        setValueFeedback("feedbackOpen", false);
     };
     return (
         <div className="flex flex-col w-64 md:w-2/5 gap-12">
             <form className="flex flex-col w-full" onSubmit={handleSubmit(onSubmit)}>
                 <div className="flex flex-col">
-                    <div className="mb-4 ">
-                        <TextField 
-                            id="name" 
-                            label="Nombre y Apellido *" 
-                            type="text" 
-                            variant="outlined" 
-                            color="warning" 
-                            fullWidth
-                            {...register("name", { required: "Este campo es requerido" })}
-                            error={!!errors.name}
-                            helperText={errors.name ? errors.name.message : "Ingrese Nombre y Apellido"}
-                        />
-                    </div>
-                    <div className="mb-4">
-                        <TextField 
-                            id="email" 
-                            label="Email *" 
-                            type="text" 
-                            variant="outlined" 
-                            color="warning" 
-                            fullWidth 
-                            {...register("email", { 
-                                required: "Este campo es requerido",
-                                pattern: 
-                                    {
-                                    value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-                                    message: "Ingrese un email válido"
-                                },
-                                validate: (value) =>
-                                    value.endsWith("@docentes.frm.utn.edu.ar") || "Debe usar su correo institucional (@docentes.frm.utn.edu.ar)"
-                            })}
-                            error={!!errors.email || !!apiError.email}
-                            helperText={errors.email ? errors.email.message : apiError.email ? apiError.email : "Ingrese Email"}
-                        />
-                    </div>
                     <div className="mb-6">
                         <TextField 
                             id="password" 
@@ -140,10 +104,16 @@ export default function RegisterForm() {
                         type="submit"
                         disabled={registerUser.isPending}
                         >
-                            CONTINUAR
+                            CAMBIAR CONTRASEÑA
                     </Button>
                 </div>
             </form>
+            <FeedbackSnackbar
+                open={feedbackOpen}
+                onClose={handleFeedbackClose}
+                severity={feedbackSeverity}
+                message={feedbackMessage}
+            />
         </div>
     );
 };

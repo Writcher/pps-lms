@@ -35,12 +35,36 @@ export type projectFormData = {
     modalOpenDelete: boolean;
 };
 
+export type scholarProjectFormData = {
+    //filters
+    filterAnchor: any;
+    filterMenuOpen: boolean;
+    activeFilters: { [key: string ]: any }
+    showProjectSearchForm: boolean;
+    projectSearch: string;
+    normalProjectSearch: string;
+    projectTypeFilter: number;
+    showProjectTypeFilter: boolean;
+    projectStatusFilter: number;
+    showProjectStatusFilter: boolean;  
+    //pagination
+    page: number;
+    rowsPerPage: number;
+};
+
 export type projectsTableProps = {
     usercareers: userCareer[];
     scholarships: scholarshipType[];
     projecttypes: projectType[];
     projectstatuses: projectStatus[];
     laboratory_id: number;
+};
+
+export type scholarProjectsTableProps = {
+    projecttypes: projectType[];
+    projectstatuses: projectStatus[];
+    laboratory_id: number;
+    current_id: number;
 };
 
 export type fetchTableProjectsData = {
@@ -55,6 +79,18 @@ export type fetchTableProjectsData = {
     rowsPerPage: number;
 };
 
+export type fetchScholarTableProjectsData = {
+    projectSearch: string;
+    projectstatus_id: number;
+    projecttype_id: number;
+    laboratory_id: number;
+    page: number;
+    rowsPerPage: number;
+    current_id: number;
+};
+
+export type getScholarTableProjectsQuery = fetchScholarTableProjectsData;
+
 export type getTableProjectsQuery = fetchTableProjectsData;
 
 export type fetchedTableProject = {
@@ -65,6 +101,7 @@ export type fetchedTableProject = {
     completedprojecttaskcount: number;
     projecttypename: string;
     projectstatusname: string;
+    newobservations: number;
 };
 
 export type createModalProps = {

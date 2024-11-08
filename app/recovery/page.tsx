@@ -1,30 +1,8 @@
 import LabTrackLogoWhite, { LabTrackLogoBlack } from "../components/labtrack-logo";
-import Alert from "@mui/material/Alert";
-import { getTypeAdmin, getTypeGuest, getTypeScholar } from "../lib/queries/usertype";
 import Link from "next/link";
-import LoginForm from "../components/login/login-form";
+import RecoveryForm from "../components/recovery/recovery-form";
 
-export default async function Login({searchParams}: {searchParams: {verified: string, recovery: string}}) {
-    const adminType = await getTypeAdmin();
-    const scholarType = await getTypeScholar();
-    const guestType = await getTypeGuest();
-
-    const isVerified = searchParams.verified;
-    let verifiedaccount
-    if (isVerified === "true") {
-        verifiedaccount = "Email verificado, puedes iniciar sesión."
-    } else {
-        verifiedaccount = ""
-    };
-    
-    const fromRecovery = searchParams.recovery;
-    let recoverypassword
-    if (fromRecovery === "true") {
-        recoverypassword = "Contraseña modificada, puedes iniciar sesión."
-    } else {
-        recoverypassword = ""
-    };
-
+export default async function Register() {
     return (
         <main className="flex flex-row h-screen w-screen bg-gray-100">
             <div className="relative flex flex-col h-full w-2/5 hidden md:block" style={{ backgroundImage: "url('/research-background.png')" }}>
@@ -42,23 +20,17 @@ export default async function Login({searchParams}: {searchParams: {verified: st
                 <div className="flex block md:hidden">
                     <LabTrackLogoBlack />
                 </div>
-                {verifiedaccount && <Alert variant="filled" severity="success">{verifiedaccount}</Alert>}
-                {recoverypassword && <Alert variant="filled" severity="success">{recoverypassword}</Alert>}
                 <div className="flex">
                     <p className="text-xl md:text-3xl text-gray-700 font-medium">
                         <strong className="text-gray-700">
-                            INICIAR SESIÓN
+                            RECUPERAR CONTRASEÑA
                         </strong>
                     </p>
                 </div>
                 <div className="flex w-screen md:w-full justify-center items-center">
-                    <LoginForm admin={adminType} guest={guestType} scholar={scholarType}/>
-                </div>
-                <div className="flex">
-                    <strong className="text-gray-700">¿No tienes una cuenta? <Link className="text-orange-500" href={"/register"}>Crea una</Link>.</strong>
+                    <RecoveryForm />
                 </div>
             </div>
         </main>
     );
 };
-

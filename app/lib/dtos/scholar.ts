@@ -84,6 +84,7 @@ export type newScholarQuery = newUserQuery & {
     careerlevel: number;
     usercareer_id: number;
     scholarshiptype_id: number;
+    laboratory_id: number;
 };
 
 export type editModalProps = {

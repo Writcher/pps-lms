@@ -9,7 +9,7 @@ import Alert from "@mui/material/Alert";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { loginFormData, loginFormProps } from "@/app/lib/dtos/user";
 import { useMutation } from "@tanstack/react-query";
-import { doCredentialLogin } from "@/app/services/login/login.service";
+import { doCredentialLogin, doLogout } from "@/app/services/login/login.service";
 import CircularProgress from "@mui/material/CircularProgress";
 import Link from "next/link";
 
@@ -26,16 +26,22 @@ export default function LoginForm({ admin, guest, scholar }: loginFormProps ) {
     const mutation = useMutation({
         mutationFn: (data: loginFormData) => doCredentialLogin(data),
         onSuccess: (result) => {
+            console.log(result)
             if (result && result.success) {
-                switch (result.usertype_id) {
-                    case scholar:
-                        router.push("/scholar/dashboard");
-                        break;
-                    case admin:
-                        router.push("/admin/projects");
-                        break;
-                    case guest:
-                        router.push("/guest/projects");
+                if (result.userlab !== null && result.userlab !== undefined) {
+                    switch (result.usertype_id) {
+                        case scholar:
+                            router.push("/scholar/projects");
+                            break;
+                        case admin:
+                            router.push("/admin/projects");
+                            break;
+                        case guest:
+                            router.push("/guest/projects");
+                    };
+                } else {
+                    doLogout();
+                    router.push(`/register/lab?userid=${result.user_id}&warn=true`);
                 };
             } else if (result) {
                 if (result.apiError) {
@@ -43,8 +49,10 @@ export default function LoginForm({ admin, guest, scholar }: loginFormProps ) {
                 };
             };
         },
-        onError: (error: APIErrors) => {
-            setApiError({ email: error.email, other: error.other });
+        onError: (error) => {
+            let message: APIErrors = {};
+            message.other = "Se ha encontrado un error, intenta nuevamente"
+            setApiError(message);
         },
     });
     const onSubmit: SubmitHandler<loginFormData> = (data) => {
@@ -87,7 +95,7 @@ export default function LoginForm({ admin, guest, scholar }: loginFormProps ) {
                     />
                 </div>
                 <div className="flex items-center justify-center mb-6">
-                    <strong className="text-sm text-gray-700">¿Olvidaste tu contraseña? <Link className="text-sm text-orange-500" href={"#"}>Cambiala</Link>.</strong>
+                    <strong className="text-sm text-gray-700">¿Olvidaste tu contraseña? <Link className="text-sm text-orange-500" href={"/recovery"}>Cambiala</Link>.</strong>
                 </div>
                 <Button 
                     variant="contained" 

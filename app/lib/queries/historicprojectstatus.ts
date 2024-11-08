@@ -34,7 +34,6 @@ export async function createHistoricProjectStatus(params: createABMItemQuery) {
 
 export async function getHistoricProjectStatusByName(name: string) {
     try {
-        console.log("AAAAAAAAAAAAAAAAAAAAA", name)
         const text = `
         SELECT * FROM "historicprojectstatus"
         WHERE name = $1

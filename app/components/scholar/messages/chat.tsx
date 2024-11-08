@@ -221,13 +221,12 @@ export default function ChatScholar({ laboratory_id, current_id, usertype_id }: 
                                                 </span>
                                                 <IconButton
                                                     color="error"
-                                                    className="h-[1px] w-[1px]"
+                                                    className={`h-[1px] w-[1px] ${msg.sender_id === current_id_number ? '' : 'hidden'}`}
                                                     onClick={() => handleDelete(msg.id)}
                                                 >
                                                     <ClearIcon />
                                                 </IconButton>
                                             </div>
-                                            <div className={`absolute ${msg.sender_id === current_id_number ? 'border-t-8 border-b-10 border-t-transparent border-b-transparent border-l-8 border-l-gray-600 left-full bottom-[0px]' : 'border-t-8 border-b-10 border-t-transparent border-b-transparent border-r-8 border-r-orange-500 right-full bottom-[0px]'}`} />
                                         </div>
                                     </div>
                                 ))}
