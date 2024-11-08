@@ -1,9 +1,9 @@
 "use server"
 
 import { createLabData, createLabQuery, laboratory } from "@/app/lib/dtos/laboratory";
-import { createAdminData, newUserQuery } from "@/app/lib/dtos/user";
+import { addLabData, createAdminData, newUserQuery } from "@/app/lib/dtos/user";
 import { createLab, getLabs } from "@/app/lib/queries/laboratory";
-import { createUser } from "@/app/lib/queries/user";
+import { addUserLab, createUser, getUserById, userHasLab } from "@/app/lib/queries/user";
 import { getStatusPending } from "@/app/lib/queries/userstatus";
 import { getTypeAdmin } from "@/app/lib/queries/usertype";
 import { db } from "@vercel/postgres";
@@ -12,6 +12,7 @@ import bcrypt from 'bcryptjs';
 interface APIErrors {
     email?: string,
     name?: string,
+    other?: string,
 };
 
 export async function createAdmin(data: createAdminData)  {
@@ -36,19 +37,40 @@ export async function createAdmin(data: createAdminData)  {
             name: data.name,
             email: data.email,
             password: hashedPassword,
-            laboratory_id: data.laboratory_id,
             usertype_id: usertype_id,
             userstatus_id: userstatus_id
         } as newUserQuery;
         try {
-            await createUser(admin);
-            return { success: true };
+            const response = await createUser(admin);
+            return { user_id: response, success: true };
         } catch (error) {
             console.error("Error al crear Usuario:", error);
-            return { success: false };
+            throw error;
         };
     } catch (error) {
         console.error("Error en createAdmin:", error);
+        throw error;
+    };
+};
+
+export async function addLab(data: addLabData) {
+    try {
+        const user = await getUserById(data.user_id);
+        const apiErrors: APIErrors = {};
+        if (!user) {
+            apiErrors.other = "Usuario no encontrado";
+        };
+        const haslab = await userHasLab(data.user_id);
+        if (haslab) {
+            apiErrors.other = "Usuario ya tiene laboratorio";
+        };
+        if (Object.keys(apiErrors).length > 0) {
+            return { success: false, apiError: apiErrors };
+        };
+        await addUserLab(data);
+        return { success: true };
+    } catch (error) {
+        console.error("Error en addLab:", error);
         return { success: false };
     };
 };

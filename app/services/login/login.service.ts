@@ -63,7 +63,7 @@ export async function doCredentialLogin(data: loginFormData) {
                     password: data.password,
                     redirect: false
                 });
-                return { success: true, ...response, usertype_id: user.usertype_id };
+                return { success: true, ...response, usertype_id: user.usertype_id, userlab: user.laboratory_id, user_id: user.id };
             } else {
                 apiErrors.password = "Contraseña incorrecta";
                 return { success: false, apiError: apiErrors };
@@ -74,7 +74,7 @@ export async function doCredentialLogin(data: loginFormData) {
         };
     } catch (error) {
         console.error("Error en doCredentialLogin:", error);
-        return { success: false };
+        throw error;
     };
 };
 
