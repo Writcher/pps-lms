@@ -29,7 +29,7 @@ export default function ChangePasswordForm({ token }: { token: string }) {
             router.push("/login?recovery=true");
         },
         onError: (error) => {
-            setValueFeedback("feedbackMessage", `Se ha encontrado un error, por favor, intentalo nuevamente`);
+            setValueFeedback("feedbackMessage", `El link para recuperar contraseña ya no es válido, intenta nuevamente.`);
             setValueFeedback("feedbackSeverity", 'error');
             setValueFeedback("feedbackOpen", true);
             reset();

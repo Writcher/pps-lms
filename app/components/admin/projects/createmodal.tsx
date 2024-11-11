@@ -112,7 +112,7 @@ export default function CreateProjectModal({ open, handleClose, projecttypes, pr
             <div className='flex flex-col m-2'>
                 <DialogTitle>
                     <div className='text-gray-700 items-center font-medium text-2xl md:text-3xl mb-2'>
-                        Añadir Historico de Proyecto
+                        Añadir Proyecto
                     </div>
                 </DialogTitle>
                 <DialogContent>
