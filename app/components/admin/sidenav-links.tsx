@@ -21,7 +21,7 @@ const linksadmin = [
     { name: 'Inventario', href: '/admin/inventory', icon: InventoryIcon },
     { name: 'Mensajes', href: '/admin/messages', icon: ChatIcon },
     { name: 'Usuarios', href: '/admin/usermanagement', icon: GroupIcon },
-    { name: 'Gestión de Parametros', href: '/admin/paramsmanagement', icon: BuildIcon },
+    { name: 'Parámetros', href: '/admin/paramsmanagement', icon: BuildIcon },
     
     //Añadir links segun necesario aca.
 ];
