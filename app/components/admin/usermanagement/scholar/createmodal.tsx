@@ -64,7 +64,7 @@ export default function CreateScholarModal({ open, handleClose, usercareers, sch
             scholarshiptype_id: data.scholarshiptype_id,
             address: data.address,
             phone: data.phone,
-            email: data.email,
+            email: data.email.toLowerCase(),
             password: data.password,
             laboratory_id: laboratory_id
         });

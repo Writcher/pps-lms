@@ -9,7 +9,7 @@ import WorkIcon from '@mui/icons-material/Work';
 
 const linksguest = [
   { name: 'Proyectos', href: '/guest/projects', icon: WorkIcon },
-  { name: 'Historico', href: '/guest/historic', icon: HistoryIcon },
+  { name: 'Histórico', href: '/guest/historic', icon: HistoryIcon },
   { name: 'Inventario', href: '/guest/inventory', icon: InventoryIcon },
   
   //Añadir links segun necesario aca.

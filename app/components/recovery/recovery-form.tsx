@@ -49,7 +49,9 @@ export default function RecoveryForm() {
         }
     })
     const onSubmit: SubmitHandler<{ email: string }> = (data) => {
-        mutation.mutate(data);
+        mutation.mutate({
+            email: data.email.toLowerCase(),
+        });
     };
     const feedbackOpen = watchFeedback("feedbackOpen");
     const feedbackSeverity = watchFeedback("feedbackSeverity");

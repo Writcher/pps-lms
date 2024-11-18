@@ -17,7 +17,7 @@ import { fetchUnreadCount } from '@/app/services/messages/chat.service';
 
 const linksadmin = [
     { name: 'Proyectos', href: '/admin/projects', icon: WorkIcon },
-    { name: 'Historico', href: '/admin/historic', icon: HistoryIcon },
+    { name: 'Histórico', href: '/admin/historic', icon: HistoryIcon },
     { name: 'Inventario', href: '/admin/inventory', icon: InventoryIcon },
     { name: 'Mensajes', href: '/admin/messages', icon: ChatIcon },
     { name: 'Usuarios', href: '/admin/usermanagement', icon: GroupIcon },

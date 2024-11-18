@@ -64,7 +64,7 @@ export default function CreateGuestModal({ open, handleClose, laboratory_id, set
     const onSubmit: SubmitHandler<createFormData> = (data) => {
         mutation.mutate({ 
             name: data.name,
-            email: data.email,
+            email: data.email.toLowerCase(),
             expires_at: data.expires_at,
             password: data.password,
             laboratory_id: laboratory_id

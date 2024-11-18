@@ -56,7 +56,10 @@ export default function LoginForm({ admin, guest, scholar }: loginFormProps ) {
         },
     });
     const onSubmit: SubmitHandler<loginFormData> = (data) => {
-        mutation.mutate(data);
+        mutation.mutate({
+            email: data.email.toLowerCase(),
+            password: data.password,
+        });
     };
     return (
         <div className="flex flex-col w-64 md:w-2/5 gap-12">

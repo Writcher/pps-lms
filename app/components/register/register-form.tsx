@@ -45,7 +45,7 @@ export default function RegisterForm() {
         registerUser.mutate({
             name: data.name,
             password: data.password,
-            email: data.email,
+            email: data.email.toLowerCase(),
         });
     };
     return (
